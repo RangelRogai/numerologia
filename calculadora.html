@@ -271,6 +271,14 @@
             #tt-mobile-close {
                 display: block !important;
             }
+            .grid-cards {
+                grid-template-columns: repeat(2, 1fr);
+                justify-items: center;
+            }
+            .grid-cards > .card:last-child:nth-child(odd) {
+                grid-column: 1 / -1;
+                width: 50%;
+            }
         }
 
         .tt-field-section {
