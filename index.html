@@ -55,26 +55,6 @@ button {
 button:hover {
   opacity: 0.9;
 }
-
-.mensagem {
-  margin-top: 20px;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: none;
-}
-
-.mensagem.pendente {
-  background: rgba(202, 168, 94, 0.2);
-  border: 1px solid #caa85e;
-  color: #caa85e;
-}
-
-.mensagem.negado {
-  background: rgba(255, 80, 80, 0.2);
-  border: 1px solid #ff5050;
-  color: #ff5050;
-}
 </style>
 </head>
 
@@ -87,16 +67,6 @@ button:hover {
   <div class="subtitle">Mapa Completo</div>
 
   <button onclick="login()">Entrar com Google</button>
-
-  <div class="mensagem pendente" id="msg-pendente">
-    ⏳ Seu acesso está sendo analisado.<br>
-    Aguarde a aprovação e tente novamente em breve.
-  </div>
-
-  <div class="mensagem negado" id="msg-negado">
-    ❌ Acesso não autorizado.<br>
-    Entre em contato com o administrador.
-  </div>
 </div>
 
 <script type="module">
@@ -129,34 +99,29 @@ async function checkUser() {
 
   const email = userData.user.email
 
-  // Busca todos os registros do email (evita erro de duplicata)
   const { data, error } = await supabase
     .from('permitidos')
     .select('status')
     .eq('email', email)
 
-  // Email não encontrado — cadastra como pendente (só uma vez)
+  // Email não encontrado — cadastra como pendente e manda para tela de espera
   if (error || !data || data.length === 0) {
     await supabase.from('permitidos').insert([
       { email: email, status: 'pendente' }
     ])
     await supabase.auth.signOut()
-    document.getElementById('msg-pendente').style.display = 'block'
+    window.location.href = 'aguardando.html'
     return
   }
 
-  // Verifica se algum registro está aprovado
   const aprovado = data.find(r => r.status === 'aprovado')
-  const pendente = data.find(r => r.status === 'pendente')
 
   if (aprovado) {
     window.location.href = 'calculadora.html'
-  } else if (pendente) {
-    await supabase.auth.signOut()
-    document.getElementById('msg-pendente').style.display = 'block'
   } else {
+    // Pendente ou negado — manda para tela de espera
     await supabase.auth.signOut()
-    document.getElementById('msg-negado').style.display = 'block'
+    window.location.href = 'aguardando.html'
   }
 }
 
