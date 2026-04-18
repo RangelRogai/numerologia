@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Numerologia Arquetípica</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0b0b0b, #1c1c1c);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 350px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  padding: 40px;
+  border-radius: 15px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.logo {
+  width: 120px;
+  margin-bottom: 15px;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 10px 0;
+}
+
+.subtitle {
+  color: #caa85e;
+  margin-bottom: 25px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #7f5af0, #2cb67d);
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <img src="logo.png" class="logo">
+
+  <h1>Numerologia Arquetípica</h1>
+  <div class="subtitle">Mapa Completo</div>
+
+  <button onclick="login()">Entrar com Google</button>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://bbochtktsyrvkccbkgur.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJib2NodGt0c3lydmtjY2JrZ3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzM0MzUsImV4cCI6MjA5MjA0OTQzNX0.i3XFaK10ziRC6USBm-pw9pOoXIvzY2LgDaskDCDyd1E'
+)
+
+window.login = async function () {
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://cute-tapioca-71fcf0.netlify.app/index.html'
+    }
+  })
+}
+
+// 🔑 CORREÇÃO: deixa o listener cuidar de TUDO
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    await checkUser()
+  }
+})
+
+async function checkUser() {
+  const { data } = await supabase.auth.getUser()
+
+  if (data?.user) {
+    const email = data.user.email
+    const permitidos = ["rangel@rangelrogai.com"]
+
+    if (!permitidos.includes(email)) {
+      alert("Acesso não autorizado")
+      await supabase.auth.signOut()
+      return
+    }
+
+    window.location.href = "calculadora.html"
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Numerologia Arquetípica</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #d97706; /* Dourado */
+            --accent-hover: #b45309;
+            --luz-color: #34d399; /* Verde para Luz */
+            --sombra-color: #f87171; /* Vermelho para Sombra */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media(max-width: 768px) {
+            .input-section { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+            /* Melhoria para campos de data em mobile */
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        button {
+            grid-column: 1 / -1;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+            /* Evita zoom ao dar duplo clique no mobile */
+            touch-action: manipulation; 
+        }
+
+        button:hover { background-color: var(--accent-hover); }
+
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+            padding-bottom: 50px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .results-header h2 { color: var(--accent); margin: 0; }
+
+        .category-title {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid var(--accent);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: help; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Permite o toque no mobile sem bugs */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        .card .value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 10px 0;
+        }
+
+        .card .title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .card .desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Estilos da Janela Flutuante (Tooltip) */
+        #tooltip {
+            position: fixed;
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid var(--accent);
+            padding: 20px;
+            border-radius: 12px;
+            width: 380px; 
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none; /* No desktop, o mouse atravessa */
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            color: var(--text-main);
+        }
+
+        #tooltip.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Adaptação exclusiva para Celulares */
+        @media(max-width: 768px) {
+            #tooltip {
+                top: auto !important; /* Remove posicionamento do mouse */
+                bottom: 20px !important; /* Fixa no fundo */
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 90%; /* Ocupa a largura da tela */
+                max-height: 80vh; /* Não deixa ultrapassar a tela */
+                overflow-y: auto; /* Permite rolagem no texto longo */
+                pointer-events: auto; /* Permite rolar com o dedo */
+            }
+            /* Exibe instrução de fechar no mobile */
+            #tt-mobile-close {
+                display: block !important;
+            }
+            .card {
+                cursor: pointer;
+            }
+        }
+
+        .tt-field-section {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #334155;
+        }
+
+        #tt-field-title {
+            color: #f8fafc;
+            font-size: 1rem;
+            margin: 0 0 5px 0;
+            font-weight: 600;
+        }
+
+        #tt-field-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        #tt-arcano-section {
+            display: block;
+        }
+
+        #tt-title {
+            color: var(--accent);
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        #tt-sub {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0 0 15px 0;
+            font-style: italic;
+        }
+
+        .tt-section {
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .tt-label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .tt-label.luz { color: var(--luz-color); }
+        .tt-label.sombra { color: var(--sombra-color); }
+        .tt-text { color: #cbd5e1; }
+
+        #tt-mobile-close {
+            display: none;
+            text-align: center;
+            color: var(--accent);
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #334155;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Numerologia Arquetípica</h1>
+    <p class="subtitle">Descubra as frequências do seu mapa de autoconhecimento</p>
+
+    <div class="input-section">
+        <div class="input-group">
+            <label>Nome do Assistido</label>
+            <input type="text" id="nome" placeholder="Ex: João da Silva">
+        </div>
+        <div class="input-group">
+            <label>Data de Nascimento</label>
+            <input type="date" id="data_nasc">
+        </div>
+        <div class="input-group">
+            <label>Ano de Análise</label>
+            <input type="number" id="ano_analise" value="2026">
+        </div>
+        <button onclick="calcular()">Gerar Mapa Numerológico</button>
+    </div>
+
+    <div class="results-section" id="results">
+        <div class="results-header">
+            <h2>Mapa de <span id="res_nome"></span></h2>
+            <p>Signo Astrológico: <strong style="color: var(--accent);" id="res_signo"></strong></p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">💡 Passe o mouse (ou toque) sobre os cards para ler a interpretação específica.</p>
+        </div>
+
+        <div class="category-title">Identidade Vibracional (Nome)</div>
+        <div class="grid-cards">
+            <div class="card" style="border-left-color: #f59e0b;" data-field="arcano">
+                <div class="title">Arcano Pessoal</div>
+                <div class="value" id="val_arcano">0</div>
+                <div class="desc" id="desc_arcano" style="font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 5px;">O Arcano</div>
+                <div class="desc">Soma pitagórica do nome</div>
+            </div>
+        </div>
+
+        <div class="category-title">Essência e Personalidade</div>
+        <div class="grid-cards">
+            <div class="card" data-field="pi">
+                <div class="title">PI - Personalidade Interna</div>
+                <div class="value" id="val_pi">0</div>
+                <div class="desc">A alma nos bastidores</div>
+            </div>
+            <div class="card" data-field="pe">
+                <div class="title">PE - Personalidade Externa</div>
+                <div class="value" id="val_pe">0</div>
+                <div class="desc">O cartão de visitas</div>
+            </div>
+            <div class="card" data-field="pg">
+                <div class="title">PG - Personalidade Geral</div>
+                <div class="value" id="val_pg">0</div>
+                <div class="desc">A vida na prática</div>
+            </div>
+            <div class="card" data-field="oc">
+                <div class="title">OC - Personalidade Oculta</div>
+                <div class="value" id="val_oc">0</div>
+                <div class="desc">A essência silenciosa</div>
+            </div>
+        </div>
+
+        <div class="category-title">Bagagem, Missão e Desafios</div>
+        <div class="grid-cards">
+            <div class="card" data-field="rva">
+                <div class="title">RVA - Regência Vida Anterior</div>
+                <div class="value" id="val_rva">0</div>
+                <div class="desc">A bagagem do passado</div>
+            </div>
+            <div class="card" data-field="mva">
+                <div class="title">MVA - Missão de Vida Atual</div>
+                <div class="value" id="val_mva">0</div>
+                <div class="desc">A bússola existencial</div>
+            </div>
+            <div class="card" style="border-left-color: #ef4444;" data-field="df">
+                <div class="title">DF - Desafio Principal</div>
+                <div class="value" id="val_df">0</div>
+                <div class="desc">O aspecto a ser equilibrado</div>
+            </div>
+            <div class="card" style="border-left-color: #ef4444;" data-field="ab">
+                <div class="title">AB - Abalo</div>
+                <div class="value" id="val_ab">0</div>
+                <div class="desc">O fator desestabilizador</div>
+            </div>
+        </div>
+
+        <div class="category-title">Forças de Apoio e Libertação</div>
+        <div class="grid-cards">
+            <div class="card" style="border-left-color: #22c55e;" data-field="fd">
+                <div class="title">FD - Força do Desafio</div>
+                <div class="value" id="val_fd">0</div>
+                <div class="desc">O antídoto para estagnação</div>
+            </div>
+            <div class="card" style="border-left-color: #22c55e;" data-field="fm">
+                <div class="title">FM - Força da Missão</div>
+                <div class="value" id="val_fm">0</div>
+                <div class="desc">Combustível para o propósito</div>
+            </div>
+            <div class="card" style="border-left-color: #8b5cf6;" data-field="ilka">
+                <div class="title">ILKA</div>
+                <div class="value" id="val_ilka">0</div>
+                <div class="desc">Idade de Libertação (anos)</div>
+                <div class="desc" style="font-weight: 600; color: #a78bfa; margin-top: 5px; font-size: 0.9rem;" id="val_ano_ilka">Ano: 0000</div>
+            </div>
+        </div>
+
+        <div class="category-title">Dinâmicas do Ano e Ciclos (Ano Base: <span id="res_ano"></span>)</div>
+        <div class="grid-cards">
+            <div class="card" data-field="far">
+                <div class="title">FAR - Freq. do Ano Regente</div>
+                <div class="value" id="val_far">0</div>
+                <div class="desc">Clima do ano específico</div>
+            </div>
+            <div class="card" data-field="fcr">
+                <div class="title">FCR - Freq. do Ciclo Regente</div>
+                <div class="value" id="val_fcr">0</div>
+                <div class="desc">O grande ciclo de longo prazo</div>
+            </div>
+            <div class="card" style="border-left-color: #3b82f6;" data-field="fp">
+                <div class="title">FP - Frequência Principal</div>
+                <div class="value" id="val_fp">0</div>
+                <div class="desc">A síntese de energias do ano</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Div da Janela Flutuante (Tooltip) -->
+<div id="tooltip">
+    <div class="tt-field-section">
+        <h3 id="tt-field-title">Título do Campo</h3>
+        <p id="tt-field-desc">Descrição fiel retirada da apostila.</p>
+    </div>
+    
+    <div id="tt-arcano-section">
+        <h3 id="tt-title">Nome do Arcano</h3>
+        <p id="tt-sub">Subtítulo</p>
+
+        <!-- Modo Dual (Luz/Sombra) -->
+        <div id="tt-mode-dual">
+            <div class="tt-section">
+                <span class="tt-label luz">☀ Na Luz:</span>
+                <span class="tt-text" id="tt-luz">...</span>
+            </div>
+            <div class="tt-section" style="margin-top: 15px;">
+                <span class="tt-label sombra">☾ Na Sombra:</span>
+                <span class="tt-text" id="tt-sombra">...</span>
+            </div>
+        </div>
+
+        <!-- Modo Single (Para OC, DF, AB) -->
+        <div id="tt-mode-single" style="display: none;">
+            <div class="tt-section">
+                <span class="tt-label" id="tt-single-label" style="color: var(--accent);">➤ Atuação:</span>
+                <span class="tt-text" id="tt-single-text">...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="tt-mobile-close">[ Toque para fechar ]</div>
+</div>
+
+<script>
+    const camposData = {
+        'arcano': { title: "Arcano Pessoal", desc: "A identidade vibracional extraída do nome. Representa o arquétipo principal, os sentimentos, as tendências, o perfil e o 'EU'." },
+        'pi': { title: "Personalidade Interna (P.I.)", desc: "É o seu refúgio, o lugar para onde você volta quando está sozinho. Dita as suas necessidades mais íntimas e a forma peculiar de ver e sentir o mundo nos bastidores." },
+        'pe': { title: "Personalidade Externa (P.E.)", desc: "É a sua 'roupa social', a primeira impressão que você causa às pessoas e a imagem que você projeta (consciente ou inconscientemente) ao mundo." },
+        'pg': { title: "Personalidade Geral (P.G.)", desc: "O resultado prático da mistura entre a P.I. e a P.E. Mostra como você é na lida diária, como resolve problemas e a sua identidade ativa perante a vida adulta." },
+        'oc': { title: "Personalidade Oculta (O.C.)", desc: "Atua como uma âncora discreta. É uma qualidade enraizada, sutil e extremamente poderosa que assume o controle em momentos de dúvida ou ao sair da zona de conforto." },
+        'rva': { title: "Regência da Vida Anterior (R.V.A.)", desc: "A bagagem de experiências passadas. Indica talentos inatos e características muito bem consolidadas, bem como pendências ou medos antigos que acompanham a sua essência." },
+        'mva': { title: "Missão de Vida Atual (M.V.A.)", desc: "A bússola para esta jornada. Dita o tom da evolução que a sua essência procura nesta vida e atua como um cronômetro biológico para os seus grandes ciclos de mudança." },
+        'df': { title: "Desafio Principal (D.F.)", desc: "A sua 'pedra no sapato' ou dificuldade central. É a musculatura emocional que você veio exercitar para vencer os padrões repetitivos de autossabotagem." },
+        'ab': { title: "Abalo (A.B.)", desc: "O fator desestabilizador intenso e repentino. Surge para testar as suas bases naquelas situações impulsivas em que perdemos completamente o controle emocional." },
+        'fd': { title: "Força do Desafio (F.D.)", desc: "É o 'antídoto' para o seu Desafio. Indica qual é a atitude, postura ou energia que você deve acionar e focar para conseguir sair de estagnações e ganhar resiliência." },
+        'fm': { title: "Força da Missão (F.M.)", desc: "É o seu 'combustível'. Traz a sustentação, o foco e a energia de que você precisa para não desanimar e continuar a caminhar na direção do seu propósito." },
+        'ilka': { title: "Idade de Libertação de Karma Acumulado", desc: "A I.L.K.A. é um marco de tempo natural. Indica uma idade propícia para o início de uma nova fase, onde antigas bagagens emocionais perdem a importância, marcando profunda maturidade e libertação." },
+        'far': { title: "Frequência do Ano Regente (F.A.R.)", desc: "Serve para descobrir a vibração e o arquétipo que rege os acontecimentos do ano em específico, colorindo o clima e dando o tom daquele período." },
+        'fcr': { title: "Frequência do Ciclo Regente (F.C.R.)", desc: "Aponta para o grande ciclo de longo prazo em que você se encontra. Indica a energia de transição, o fim de etapas e a renovação de rota da sua vida." },
+        'fp': { title: "Frequência Principal (F.P.)", desc: "É a síntese das energias atuantes no ano da consulta. Revela o tom geral das experiências ao cruzar as vibrações do Ano Regente e do grande Ciclo Regente." }
+    };
+
+    const arquetiposData = {
+        1: { 
+            nome: "O Mago", sub: "A Vontade que se Torna Ação",
+            geral: { luz: "Proativo, engenhoso, flexível, independente, imaginativo, articulado, autoconfiante.", sombra: "Manipulador, dependente, disperso, desistente, charlatão, superficial." },
+            pi: { luz: "Essência proativa, independente e imaginativa. Fluxo intenso de ideias, vontade firme de crescimento contínuo e presença de dons mediúnicos ou intuição afiada.", sombra: "Postura insegura e dependente. Vontade de iniciar projetos, mas que esbarra na falta de iniciativa ou na tendência crónica a desistir a meio do caminho." },
+            pe: { luz: "Projeção de uma imagem competente, dinâmica, articulada e com grande facilidade de comunicação e persuasão.", sombra: "Impressão externa de superficialidade. Perfil do 'sabe-tudo' arrogante ou de um indivíduo falador, que promete muito e entrega pouco." },
+            pg: { luz: "Atuação engenhosa e flexível para fazer acontecer. Assume riscos com inteligência, adapta-se aos cenários e alcança crescimento contínuo em novos projetos.", sombra: "Comportamento inconstante e disperso. Gastos de energia em múltiplas ideias sem a disciplina necessária para executar e finalizar nenhuma delas." },
+            rva: { luz: "Sabedoria de vidas passadas voltada para a integração de conhecimentos e consolidação da independência pessoal.", sombra: "Frustração latente por projetos ou oportunidades antigas abandonadas, gerando a sensação íntima de estar eternamente em atraso." },
+            mva: { luz: "Missão realizadora e comunicativa. Materialização de ideias, aceitação de novos desafios e empoderamento do coletivo através da disseminação clara de informações.", sombra: "Desvio da missão ao adotar uma postura egoísta ou charlatã, retendo conhecimento ou ensinando apenas para benefício próprio." },
+            oc: "Despertar de uma inteligência rápida e criativa que encontra saídas inovadoras quando a situação exige e os caminhos fáceis desaparecem.",
+            df: "Superação de uma postura desistente e ilusória. A luta diária é evitar os discursos vazios e a dependência alheia, alinhando a teoria com a prática executada.",
+            ab: "Quedas bruscas desencadeadas por atitudes enganadoras. O charlatanismo e a autoconfiança cega (que ignoram o preparo real) desmoronam rapidamente a credibilidade."
+        },
+        2: {
+            nome: "A Sacerdotisa", sub: "O Silêncio Fértil da Consciência",
+            geral: { luz: "Intuitiva, parceira, serena, estabilizadora, sábia, diplomática.", sombra: "Fria, passiva, anulada, incrédula, manipuladora emocional, distante." },
+            pi: { luz: "Essência intuitiva, serena e dotada de grande bom senso. Busca constante por harmonia interior, segurança emocional e confiança nos próprios instintos.", sombra: "Postura confusa e anulada. Dificuldade em acreditar nas próprias intuições ou tendência a apagar-se completamente para evitar conflitos." },
+            pe: { luz: "Transmissão de uma imagem simpática, segura de si, e verdadeiramente parceira, inspirando uma atmosfera de enorme confiança e estabilidade.", sombra: "Impressão de distanciamento glacial. Pode transparecer como alguém frio, apático ou detentor de uma arrogância silenciosa que afasta as relações." },
+            pg: { luz: "Gestão da rotina com extremo tato e observação. Preferência pelo planejamento cuidadoso, mediação pacífica e atuação harmoniosa nos bastidores.", sombra: "Comportamento passivo e veladamente manipulador. A demora proposital em tomar atitudes práticas trava o fluxo da vida." },
+            rva: { luz: "Assimilação madura, equilibrada e pacífica de valiosas lições ancestrais. Sensibilidade aguçada consolidada pelo tempo.", sombra: "Carga kármica manifestada através da repressão, retendo segredos, ressentimentos mudos ou bloqueios emocionais de família que travam a expressão." },
+            mva: { luz: "Caminho focado na revelação de verdades e amadurecimento espiritual. Oferta de parceria sólida, escuta atenta e amparo estabilizador ao coletivo.", sombra: "Omissão sistemática diante das exigências da vida. O desejo doentio de manter uma 'paz intocável' conduz à inércia total e afasta a prosperidade." },
+            oc: "Em momentos de crise e caos externo, desponta como uma presença estável e perceptiva, apontando a resposta correta através da leitura do que não foi dito.",
+            df: "Superação da anulação pessoal. O desafio constante é vigiar a tendência de engolir emoções, duvidar do próprio 'sexto sentido' ou evitar posicionamentos por medo da exposição.",
+            ab: "Instabilidade repentina gerada por um isolamento frio e de anulação extrema. A repressão de sentimentos e o mutismo constroem um distanciamento cortante que estilhaça laços."
+        },
+        3: {
+            nome: "A Imperatriz", sub: "O Princípio da Criação e da Nutrição",
+            geral: { luz: "Sociável, ambiciosa, maternal, amável, idealista, sensata, comunicativa.", sombra: "Impulsiva, ciumenta, possessiva, fútil, sufocante, desregrada." },
+            pi: { luz: "Essência idealista, maternal e criativa. Necessidade íntima de crescimento contínuo, visão sensata da vida e amor à estética.", sombra: "Postura interior carente, ciumenta e vazia. O medo do abandono gera paixões desregradas e necessidade adoecida de controle." },
+            pe: { luz: "Projeção de uma imagem sociável, comunicativa, amável e elegante. Presença magnética que atrai e conforta o ambiente naturalmente.", sombra: "Aparência de futilidade ou postura excessivamente possessiva. Foco exagerado no materialismo ou exibição de arrogância centralizadora." },
+            pg: { luz: "Atuação ambiciosa, decidida e nutritiva. Facilidade para agregar pessoas, proteger os seus e expandir negócios com extrema criatividade.", sombra: "Comportamento acomodado (preguiça) ou desregrado. Forte tendência à impulsividade e descontrole financeiro guiado por luxos." },
+            rva: { luz: "Bagagem abundante, protetora e de grande poder de fertilidade trazida de ciclos passados.", sombra: "Dependência emocional antiga. Dificuldades crónicas em cortar o 'cordão umbilical' com familiares ou libertar-se de paixões dolorosas." },
+            mva: { luz: "Missão voltada para a prosperidade e geração de riqueza material/emocional. Foco em promover a estética, o amparo e a abundância no coletivo.", sombra: "Estagnação decorrente do foco exclusivo no acúmulo material egoísta e na futilidade, ignorando a responsabilidade de partilhar." },
+            oc: "Na escassez, emerge uma força protetora instintiva capaz de usar a criatividade para multiplicar possibilidades e fazer um projeto recomeçar do zero.",
+            df: "Combate à postura possessiva e à impulsividade financeira/emocional. O desafio é estabelecer limites aos excessos passionais e não se tornar sufocante.",
+            ab: "Rupturas severas desencadeadas por ciúme doentio e paixões desregradas. A ilusão de posse sobre parceiros ou o descontrole dos instintos causará quedas drásticas."
+        },
+        4: {
+            nome: "O Imperador", sub: "A Estrutura que Sustenta a Vida",
+            geral: { luz: "Positivo, perfeccionista (equilibrado), organizado, perseverante, materializador, líder.", sombra: "Autoritário, prepotente, descontrolado, possessivo, desorganizado, inflexível." },
+            pi: { luz: "Essência positiva, perseverante e focada na ordem. Pensamento estruturado que anseia por estabilidade, segurança material e crescimento lógico.", sombra: "Postura mental ansiosa, possessiva e de perfeccionismo sufocante. A necessidade cega de proteção transforma-se numa rigidez inflexível." },
+            pe: { luz: "Imagem de figura organizada, protetora e dotada de extrema força de execução. Transmissão imediata de confiança e liderança incontestável.", sombra: "Percepção externa de ser alguém prepotente, autoritário, frio ou intimidante, afastando as pessoas pelo excesso de dureza." },
+            pg: { luz: "Ação diária pautada na perseverança e na solidez. Capacidade magistral de organizar recursos, executar grandes projetos materiais e proteger o seu território.", sombra: "Comportamento centralizador que se torna paradoxalmente desorganizado sob pressão, ou totalmente descontrolado e tirânico perante a ameaça de perda de poder." },
+            rva: { luz: "Resiliência material duradoura, estabilidade emocional e capacidade de execução amplamente testada e forjada pelo tempo.", sombra: "Perfil defensivo e teimoso, marcado por embates antigos de autoritarismo ou pendências kármicas severas com figuras paternas/chefias." },
+            mva: { luz: "Missão provedora e estruturante. Realização alcançada através da execução de projetos concretos, ordem justa e oferecimento de bases sólidas ao coletivo.", sombra: "Liderança pautada pela prepotência em vez do respeito natural. Focar exclusivamente na matéria e esquecer a empatia conduzirá ao desmoronamento." },
+            oc: "Em situações de caos e rutura, desponta como o pilar seguro e racional, estabelecendo os limites e as regras que estabilizam e reestruturam o ambiente.",
+            df: "Superação de uma atitude prepotente e controladora. O desafio central é abrandar o perfeccionismo que paralisa a ação, aprender a ceder e aceitar a vulnerabilidade.",
+            ab: "Quebra violenta de estrutura causada pelo comportamento abusivo, inflexível e pelo descontrole colérico. A tentativa de impor a ordem através da agressividade arruinará as fundações."
+        },
+        5: {
+            nome: "O Sacerdote", sub: "O Mestre dos Valores e da Ética",
+            geral: { luz: "Conselheiro, prudente, comunicativo, espiritualizado, digno, equilibrado.", sombra: "Falso, hipócrita, ansioso, autoritário, manipulador, cético." },
+            pi: { luz: "Essência ética, prudente e de grande equilíbrio moral. Anseio constante por evolução espiritual, retidão e compreensão dos princípios sagrados.", sombra: "Postura mental intimamente ansiosa e cética. Cobrança interna baseada em dogmas muito severos que reprimem a própria liberdade." },
+            pe: { luz: "Imagem reconhecida de um excelente conselheiro, pessoa digna, comunicativa e com imensa facilidade para se expressar, inspirando respeito natural.", sombra: "Postura que transparece extremismo, falsidade ou doutrinação conservadora, parecendo alguém apegado a formalidades e hipócrita." },
+            pg: { luz: "Conduta alicerçada na prudência. Ouve as diversas vertentes antes de julgar, ascende na carreira com conhecimento e promove proteção e mentoria.", sombra: "Comportamento manipulador e autoritário com as palavras. Tendência a distorcer verdades, aplicar julgamentos ríspidos ou ser inflexível contra opiniões divergentes." },
+            rva: { luz: "Valorização inata do conhecimento profundo, dignidade e sabedoria conselheira assimilada ao longo de ciclos ancestrais.", sombra: "Prisões inconscientes a regras religiosas opressoras, moralismos ultrapassados ou fanatismos do passado que asfixiam o livre pensamento." },
+            mva: { luz: "Missão de ascensão e evolução ética contínua. Caminho voltado para a educação, aconselhamento e preservação da cultura.", sombra: "Fracasso originado pela adoção do papel de figura castradora. A tentativa impositiva de formatar a convicção de todos destrói o propósito de iluminar mentes." },
+            oc: "Nas crises mais profundas, assume-se como orientador sábio e protetor, utilizando a sua fé estruturada e conhecimento holístico para trazer lucidez ao grupo.",
+            df: "Combate à falsidade, à ansiedade excessiva e à necessidade de manipular pela culpa. O desafio é não se tornar um inquisidor, respeitando a liberdade alheia.",
+            ab: "Solavanco abrupto gerado por atos hipócritas e falsidade. Cobrar publicamente uma ética puritana enquanto age de má-fé destruirá integralmente a reputação."
+        },
+        6: {
+            nome: "Os Enamorados", sub: "A União e a Escolha Consciente",
+            geral: { luz: "Meigo, familiar, responsável, emotivo, simpático, amigável, jovial.", sombra: "Inseguro, passional, disperso, enfraquecido, anulado, iludido." },
+            pi: { luz: "Essência meiga, emotiva e voltada para a criação de vínculos. Anseio profundo por conciliação, amizade e paz interior no momento de escolher.", sombra: "Postura de insegurança e dúvida. Conflito íntimo e exaustivo entre a energia da juventude e o peso da maturidade, resultando no próprio esquecimento." },
+            pe: { luz: "Projeção de uma imagem simpática, amigável, receptiva e extremamente agradável, atraindo facilmente o convívio e a confiança alheia.", sombra: "Impressão externa de alguém inconstante, influenciável ou tão sobrecarregado (ao tentar fazer tudo simultaneamente) que passa falta de credibilidade." },
+            pg: { luz: "Atuação responsável, afetuosa e cooperativa. Privilegia a formação de vínculos reais, equilibrando as obrigações diárias com a simpatia e alegria.", sombra: "Comportamento passional e altamente disperso. Tendência nociva à renúncia dos prazeres para se dedicar compulsivamente aos problemas dos outros, anulando-se." },
+            rva: { luz: "Dom inato para a criação de vínculos de amizade e uma inteligência emocional pacífica e colaborativa consolidada em antigas jornadas.", sombra: "Dores estruturais originárias de renúncias extremas no passado, nas quais se anulou por parceiros ou pelo excesso de trabalho." },
+            mva: { luz: "Missão unificadora sustentada pelo afeto maduro. Construir, proteger e nutrir a família através de escolhas alinhadas e pautadas pelo coração.", sombra: "Fuga de compromissos ou estagnação completa por devotar atenção exclusiva às exigências alheias, abdicando covardemente da própria felicidade." },
+            oc: "Acionamento de uma empatia instintiva e curadora diante dos embates, mediando conflitos de forma serena ao compreender as dores de ambos os lados.",
+            df: "Superação da insegurança, da fraqueza afetiva e da dispersão multifocada. O grande desafio é aprender a dizer 'não', focar num caminho e olhar para o próprio 'Eu'.",
+            ab: "Rupturas dramáticas geradas por submissão a comportamentos passionais, pela necessidade de agradar a todos, ou por renunciar à própria dignidade."
+        },
+        7: {
+            nome: "O Carro", sub: "A Conquista Através do Autocontrole",
+            geral: { luz: "Vencedor, seguro, determinado, focado, provedor, resiliente.", sombra: "Dominador, arrogante, descontrolado, impulsivo, apressado, ansioso." },
+            pi: { luz: "Essência forte, segura e incansavelmente determinada. Sentimento inato de capacidade para vencer obstáculos, compreendendo a ligação entre a espiritualidade e a força.", sombra: "Ansiedade persistente originada pelo medo agudo de fracassar. Conflito entre a urgência visceral de agir e o medo paralisante da direção tomada." },
+            pe: { luz: "Projeção indiscutível da figura do vencedor. Imagem de direção clara, inspirando absoluta segurança e capacidade de gerir projetos e amparar o grupo.", sombra: "Perfil sentido pelos outros como arrogante, dominador, impaciente ou excessivamente agressivo perante os entraves." },
+            pg: { luz: "Excelente desenvoltura na gestão do cotidiano e condução de grandes negócios. Alcança o sucesso mantendo um ritmo constante e direcionando o trabalho com moralidade.", sombra: "Imposição de um ritmo descontrolado. A impulsividade cega ou a arrogância impaciente geram desgastes severos, acidentes de percurso ou paralisia." },
+            rva: { luz: "Coragem estruturada, foco apurado e uma inabalável mentalidade de vencedor, forjados na superação de enormes bloqueios passados.", sombra: "Condicionamento reativo próprio de quem esteve habituado a atropelar tudo no seu caminho (ou a ser brutalmente atropelado), resultando numa tensão crónica." },
+            mva: { luz: "Missão triunfante e provedora. O destino indica assumir e dirigir o próprio caminho com retidão, convertendo-se num pilar essencial de amparo para o grupo.", sombra: "Queda provocada pela perda irrecuperável das rédeas do próprio veículo, seja pelo vício destrutivo em dominar ou pela submissão apática aos projetos de terceiros." },
+            oc: "Diante das adversidades mais intimidantes, toma firmemente as rédeas com resiliência estratégica e ampara moral e materialmente os envolvidos.",
+            df: "Regulação ostensiva da postura arrogante, da fobia do descontrolo e da impaciência diária. O desafio é interiorizar que o avanço material tem de ser pautado pela evolução moral.",
+            ab: "Ruptura drástica desencadeada por uma postura excessiva e dominadora, ou por abrir mão do volante nos momentos críticos. A perda do controle gerará colisões devastadoras."
+        },
+        8: {
+            nome: "A Justiça", sub: "O Princípio da Causa, Efeito e Razão",
+            geral: { luz: "Organizado, íntegro, disciplinado, resoluto, ousado, realista, justo.", sombra: "Negativista, teimoso, rígido, frio, inflexível, crítico, punitivo." },
+            pi: { luz: "Essência íntegra, disciplinada e muito intuitiva. Busca incessante por clareza mental, organização, regras justas e equilíbrio interior.", sombra: "Postura negativista, teimosa e rígida. Excesso de autocrítica, regras pessoais estritas e cobrança por perfeição que gera insatisfação crônica." },
+            pe: { luz: "Projeção de uma imagem resoluta, ousada, realista e digna de confiança. Transmissão de prontidão e honestidade inabalável.", sombra: "Impressão externa de frieza emocional, distanciamento, severidade ou formalidade excessiva, afastando as pessoas." },
+            pg: { luz: "Atuação organizada, racional e justa. Cumprimento de prazos com prontidão e tomada de decisões ousadas pautadas no bom senso e na lei.", sombra: "Comportamento inflexível, burocrático e perfeccionista ao extremo. Intolerância severa com os erros alheios e dificuldade de lidar com imprevistos." },
+            rva: { luz: "Aceitação madura de causas e efeitos antigos, trazendo um senso de integridade já muito bem consolidado.", sombra: "Apego a injustiças sofridas no passado, gerando uma postura ressentida, desconfiada e com extrema dificuldade para perdoar." },
+            mva: { luz: "Missão equilibradora e organizadora. Promoção de relações justas, estabelecimento da ordem coletiva e colheita proporcional ao esforço.", sombra: "Estagnação ao tornar-se punitivo ou aplicar friamente as regras sem considerar o fator humano, caindo num isolamento rígido." },
+            oc: "Despertar de um senso de avaliação racional e lúcido nos momentos críticos, cortando ilusões e assumindo responsabilidades de forma ousada.",
+            df: "Superação de uma postura inflexível, negativista e do excesso de regras. O desafio é evitar a racionalização extrema que congela os sentimentos.",
+            ab: "Rupturas graves geradas por rigidez cega. A perda da razão por teimosia extrema ou disputas inflexíveis trará consequências drásticas pela lei do retorno."
+        },
+        9: {
+            nome: "O Eremita", sub: "A Maturidade do Recolhimento e do Tempo",
+            geral: { luz: "Sábio, inteligente, paciente, autodidata, experiente, profundo.", sombra: "Ranzinza, isolado, indelicado, melancólico, reclamão, lento." },
+            pi: { luz: "Essência sábia, profunda e paciente. Busca consciente por respostas internas, gosto pela natureza e valorização do silêncio e estudos.", sombra: "Postura melancólica, solitária e reclamona. Tendência a pensar muito e demorar para agir, gerando um isolamento emocional excessivo." },
+            pe: { luz: "Imagem de reserva, discrição e experiência. Perfil de excelente conselheiro que transmite profundidade intelectual e paz.", sombra: "Impressão de ser alguém ranzinza, indelicado, antipático ou de convívio excessivamente fechado." },
+            pg: { luz: "Atuação prudente, analítica e inteligente. Dedicação à pesquisa, ao ensino ou a trabalhos que exigem tempo e reflexão.", sombra: "Comportamento lento, estagnado e retraído. Recusa sistemática de convívios e tendência a reclamar muito da vida ou das pessoas." },
+            rva: { luz: "Assimilação madura de vivências, resultando num aprendizado antigo solidamente consolidado.", sombra: "Apego melancólico a memórias de outras épocas, ruminação de velhas dores e dificuldade de soltar um passado solitário." },
+            mva: { luz: "Missão orientadora e filosófica. Gosto por dar conselhos sábios, partilhando inteligência e experiência após a própria vivência.", sombra: "Estagnação ao tornar-se um crítico amargurado da sociedade, recolhendo-se ao topo da montanha sem oferecer a própria luz a quem está no escuro." },
+            oc: "Nas adversidades, encontro de imensa força e luz interior para reiniciar. Avaliação madura da crise baseada na experiência acumulada.",
+            df: "Superação da postura ranzinza e da lentidão. O desafio é não usar a introspecção como fuga social nem a demora em agir como desculpa para não viver o presente.",
+            ab: "Instabilidade severa causada por isolamento depressivo ou quebras por indelicadeza. Afastar quem oferece ajuda real causará um abandono difícil de ser revertido."
+        },
+        10: {
+            nome: "A Roda da Fortuna", sub: "A Supremacia do Movimento e dos Ciclos",
+            geral: { luz: "Ativo, dinâmico, adaptável, flexível, mutável, ascendente.", sombra: "Instável, confuso, preguiçoso, agitado, descontrolado, inconstante." },
+            pi: { luz: "Essência muito ativa, dinâmica e aberta. Compreensão natural da impermanência e vontade constante de vivenciar mudanças e ascensão.", sombra: "Postura instável, emocionalmente confusa e ansiosa. Sensação de oscilação constante (ora na direita, ora na esquerda), gerando forte agitação." },
+            pe: { luz: "Projeção de uma imagem flexível, otimista e em constante evolução. Perfil atraente que sabe surfar nas marés e mudanças da vida.", sombra: "Impressão de ser alguém inconstante, que não firma compromissos, ou alguém excessivamente agitado e disperso aos olhos alheios." },
+            pg: { luz: "Atuação adaptável e oportunista (no bom sentido). Aproveitamento rápido de novas aberturas, mantendo-se sempre muito ativo e em movimento.", sombra: "Comportamento imprevisível e desorganizado. Oscilação frequente de empregos, cuidado com a preguiça paralisante ou com a agitação extrema." },
+            rva: { luz: "Aceitação sábia das reviravoltas da vida, trazendo uma resiliência moldada por muitas mudanças e altos e baixos já superados.", sombra: "Condicionamento ansioso. Sensação constante de que a qualquer momento tudo vai mudar para pior, ou apego a fases de ouro que já não existem." },
+            mva: { luz: "Missão renovadora e impulsionadora. Quebra de padrões engessados na comunidade e ascensão conquistada através da adaptabilidade.", sombra: "Fracasso ao viver numa montanha-russa sem propósito, desperdiçando a sorte e a energia ao ignorar a necessidade de um avanço estruturado." },
+            oc: "Em crises imprevisíveis, desponta uma incrível capacidade de 'cair de pé', ajustando a vela ao novo vento sem lamentar as mudanças.",
+            df: "Superação de uma postura instável e da fobia de compromissos. O desafio é criar raízes mesmo em meio ao movimento, não cedendo à confusão.",
+            ab: "Rupturas repentinas por imprudência extrema ou falta de controlo. Tentar travar a Roda à força ou atirar-se cegamente sem planeamento gerará quedas severas."
+        },
+        11: {
+            nome: "A Força", sub: "A Diplomacia e o Domínio do Instinto",
+            geral: { luz: "Inteligente, forte, maduro, harmônico, paciente, diplomático.", sombra: "Dominador, estressado, autoritário, rígido, autocrítico, impaciente." },
+            pi: { luz: "Essência madura, inteligente e equilibrada. Confiança plena na força interior, visão longa da vida, pureza de intenções e intuição forte.", sombra: "Luta interna desgastante contra os próprios impulsos. Presença de uma forte postura autocrítica e queixosa (tendência a reclamar de tudo)." },
+            pe: { luz: "Imagem de magnetismo, autoconfiança e diplomacia que tranquiliza. Liderança exercida pela presença forte, e não pelo grito.", sombra: "Transmissão de um ar intimidante, orgulhoso ou dominador, transparecendo ser alguém que não suporta ser criticado." },
+            pg: { luz: "Atuação firme, corajosa e harmônica. Promove o equilíbrio exato entre o espiritual e o material no dia a dia, com grande vitalidade.", sombra: "Comportamento impaciente, autoritário e propenso ao stress. Impulso de dominar os processos, reclamando constantemente da equipe ou do ambiente." },
+            rva: { luz: "Superação heroica alcançada através da resiliência e do desenvolvimento de grande força espiritual.", sombra: "Desgaste físico e mental por antigas batalhas, ou raiva reprimida e não perdoada que eleva o nível de estresse atual." },
+            mva: { luz: "Missão harmônica e empoderadora. Defesa corajosa de causas justas, mantendo visão longa e ensinando a força da suavidade.", sombra: "Queda pelo uso do magnetismo para manipular e subjugar os outros em benefício das próprias vontades, perdendo a pureza de intenções." },
+            oc: "Diante do confronto, surge um domínio sereno impressionante, domando situações explosivas com inteligência emocional e pureza de intenção.",
+            df: "Moderação de uma postura rígida, reclamona e dominadora. O desafio é aprender a lidar com as críticas sem se armar e encontrar válvulas de escape.",
+            ab: "Instabilidade gerada pelo colapso do autocontrole. O uso da força bruta, agressividade ou dominação tóxica virará a energia contra si mesmo, gerando exaustão."
+        },
+        12: {
+            nome: "O Enforcado", sub: "A Pausa, o Sacrifício e a Mudança de Visão",
+            geral: { luz: "Tolerante, equilibrado, analisador, reflexivo, espiritualizado.", sombra: "Acomodado, vítima, orgulhoso, manipulador, autopunitivo, estagnado." },
+            pi: { luz: "Essência analisadora, tolerante e equilibrada. Forte ligação com a família e dedicação profunda a estudos e práticas da espiritualidade.", sombra: "Postura estagnada e idealista irreal. Sentimento íntimo de abandono, vitimismo crônico ou adoção de autopunição e falta de vontade." },
+            pe: { luz: "Imagem de pessoa compreensiva, paciente e capaz de fazer sacrifícios voluntários e nobres em nome da harmonia familiar ou coletiva.", sombra: "Impressão externa de extrema passividade, acomodação, falta de vitalidade ou de ser um manipulador através do sofrimento (chantagem emocional)." },
+            pg: { luz: "Atuação pautada na doação e na mudança constante de visão para resolver impasses de forma equilibrada. Valorização dos laços familiares.", sombra: "Comportamento paralisado e orgulhoso. Falta de vontade prática na rotina e adoção de um sofrimento sem propósito e sentimento de impotência." },
+            rva: { luz: "Revisão profunda de padrões antigos, trazendo enorme tolerância, equilíbrio e gosto por estudos profundos.", sombra: "Fortes influências kármicas não resolvidas. Prisão a dores, amarras familiares antigas e um sentimento de abandono que paralisam o avanço presente." },
+            mva: { luz: "Missão curadora e reveladora. Dedicação altruísta, quebra de paradigmas através da mudança de visão e proteção dos núcleos familiares/espirituais.", sombra: "Estagnação prolongada ao recusar a reavaliação pessoal. O sentimento de impotência transforma uma pausa temporária numa vida em cativeiro." },
+            oc: "Diante de crises sem solução aparente, emerge uma visão inédita e desapegada, virando o problema de cabeça para baixo e encontrando saídas onde havia muros.",
+            df: "Superação de uma postura vitimista, manipuladora e estagnada. O desafio é não confundir paciência e sacrifício nobre com falta de vontade e sofrimento inútil.",
+            ab: "Instabilidade aguda causada pela manipulação tóxica da dor e 'síndrome do coitado'. O uso do sacrifício para cobrar gratidão destruirá a dignidade."
+        },
+        13: {
+            nome: "A Morte", sub: "A Transmutação e o Dinamismo da Renovação",
+            geral: { luz: "Renovador, determinado, dinâmico, resoluto, jovial, transformador.", sombra: "Radical, intolerante, autoritário, inconstante, destrutivo, inflexível." },
+            pi: { luz: "Essência dinâmica, simpática e de grande jovialidade. Vontade interna profunda de renovação, crescimento e de mudar sempre para melhor.", sombra: "Postura inconstante e intolerante ('começa e para'). Tendência a radicalismos, desejando que as coisas sejam apenas à sua maneira." },
+            pe: { luz: "Imagem de pessoa simpática, determinada e em constante evolução. Perfil transformador e resoluto que moderniza os ambientes por onde passa.", sombra: "Impressão externa de frieza cirúrgica, autoritarismo ou de alguém instável e destrutivo, que traz mudanças bruscas que assustam quem está perto." },
+            pg: { luz: "Atuação resoluta e dinâmica. Corta excessos, desapega-se do que não serve e revitaliza projetos, trazendo sempre crescimento à rotina.", sombra: "Comportamento radical e sem continuidade (começa várias coisas e não as termina). Costuma exagerar nas atividades não observando o desgaste." },
+            rva: { luz: "Despedida grata de versões antigas e superação profunda de dores e ciclos, consolidando grande dinamismo e determinação.", sombra: "Resistência a manter vínculos. O hábito de romper com tudo no passado gera uma dificuldade crônica em estabelecer bases sólidas no presente." },
+            mva: { luz: "Missão transformadora e inovadora. Limpeza de terrenos para a chegada do crescimento, apoiando as pessoas em processos de mudança.", sombra: "Queda gerada por radicalismos e recusa em amadurecer. Exagerar na destruição sem construir nada de novo paralisará o seu próprio progresso." },
+            oc: "Em crises que parecem becos sem saída, emerge a força cirúrgica de uma 'fênix', capaz de colocar um ponto final limpo para iniciar a transformação necessária.",
+            df: "Regulação de uma postura radical, intolerante e desgastante. O desafio é dar continuidade ao que começa, compreendendo que a mudança precisa de consistência.",
+            ab: "Ruptura traumática causada por cortes impensados. Destruir as próprias bases estruturais num momento de intolerância, ou colapsar por ignorar o desgaste, resultará em queda."
+        },
+        14: {
+            nome: "A Temperança", sub: "A Alquimia da Paz e o Fluxo do Tempo",
+            geral: { luz: "Pacífico, estável, benevolente, harmonioso, paciente, dedicado.", sombra: "Acomodado, apático, procrastinador, passivo, inibido, alienado." },
+            pi: { luz: "Essência benevolente, dedicada e sonhadora. Busca serena pelo equilíbrio emocional, paz interior, estabilidade e confiança nas relações.", sombra: "Postura de alienação, gerando um excesso de paciência. Tendência a adotar relacionamentos mornos para evitar qualquer tipo de turbulência." },
+            pe: { luz: "Imagem de estabilidade, simpatia e autocontrole. Transmite paz e harmonia absoluta, atuando como uma âncora reconfortante.", sombra: "Impressão externa de passividade exagerada, falta de posicionamento ou apatia, parecendo alguém distante, inibido e acomodado." },
+            pg: { luz: "Atuação dedicada e conciliadora. Exerce a paciência e a atenção aos detalhes no trabalho para que os projetos atinjam um grau de excelência (perfeição).", sombra: "Comportamento acomodado na zona de conforto. O excesso de lentidão e o ato de 'sonhar muito e agir pouco' resultam em graves perdas de oportunidades." },
+            rva: { luz: "Cura consolidada de mágoas antigas e profunda reconciliação com a própria história através da benevolência e da dedicação.", sombra: "Dificuldade em libertar-se da inércia. O hábito de evitar conflitos no passado gerou uma carga de passividade que o impede de arriscar hoje." },
+            mva: { luz: "Missão integradora e estabilizadora. Promoção do entendimento pacífico, confiança e sustentação da harmonia perfeita nos mais diversos ambientes.", sombra: "Estagnação prolongada resultante da letargia. Ficar preso a um idealismo sonhador sem tomar partido e sem correr riscos esgotará a prosperidade." },
+            oc: "No meio de tempestades severas, a química interior pacifica a situação, mantendo o autocontrole e juntando as peças espalhadas de forma estável.",
+            df: "Superação de uma postura passiva e da perda de oportunidades. O desafio diário é não confundir estabilidade com acomodação, aceitando a ação e a emoção.",
+            ab: "Instabilidade provocada por alienação severa. Perder oportunidades profissionais brilhantes ou pessoas fundamentais por excesso de passividade resultará em fracasso silencioso."
+        },
+        15: {
+            nome: "O Diabo", sub: "As Prisões Invisíveis e o Poder Magnético",
+            geral: { luz: "Magnético, persistente, protetor, instintivo, rápido, próspero.", sombra: "Manipulador, viciado, confuso, agitado, falso, vaidoso, submisso." },
+            pi: { luz: "Essência magnética, persistente e profundamente ligada aos instintos. Forte presença de dons mediúnicos e proteção energética inata.", sombra: "Postura interior confusa, ansiosa e agitada. Prisão mental gerada por desejos incontroláveis, culpas e atração doentia por relações tóxicas." },
+            pe: { luz: "Imagem de poder, sedução e extrema vitalidade. Transmissão de um magnetismo envolvente e carisma que atrai oportunidades.", sombra: "Percepção externa de ser alguém falso, vaidoso ou com intenções ocultas. Pode transparecer arrogância, superficialidade ou fomentar fofocas." },
+            pg: { luz: "Atuação rápida, produtiva e focada em resultados materiais. Facilidade para gerar riqueza, assumindo o domínio das situações com grande convencimento.", sombra: "Comportamento manipulador e descontrolado. Tendência a paixões violentas, vícios e desejo doentio de dominar os outros." },
+            rva: { luz: "Assimilação de grande poder psíquico, força de vontade e profundo conhecimento da sombra humana, forjados em vivências passadas.", sombra: "Carga kármica pesada ligada a manipulações, dependências afetivas ou financeiras, trazendo memórias de servidão e relacionamentos abusivos." },
+            mva: { luz: "Missão focada no empoderamento material e emocional. Quebra de tabus, geração de prosperidade real e ensino da libertação de amarras.", sombra: "Fracasso originado pela ganância. O uso do magnetismo para escravizar o próximo e a imersão em discórdias arruínam a própria evolução." },
+            oc: "Nos momentos de escassez, emerge um faro instintivo e uma força de vontade avassaladora para reverter a situação, atraindo recursos materiais.",
+            df: "Superação da ambição cega, dos vícios e da falsidade. O desafio é libertar-se da dependência de prazeres momentâneos, não se tornando escravo das paixões.",
+            ab: "Ruptura drástica causada pela total perda de limites. O envolvimento em corrupção, vícios incontroláveis ou paixões destrutivas cobrará um preço devastador."
+        },
+        16: {
+            nome: "A Torre", sub: "A Reestruturação e a Verdade Reveladora",
+            geral: { luz: "Reestruturador, autêntico, liberto, corajoso, renovador.", sombra: "Briguento, impaciente, soberbo, orgulhoso, teimoso, intransigente." },
+            pi: { luz: "Essência autêntica e corajosa. Busca constante por libertação, não tolerando amarras ilusórias e ansiando por reestruturações que tragam a verdade à tona.", sombra: "Postura melancólica e teimosa. Desespero íntimo perante as mudanças, acompanhado de um orgulho excessivo que impede o reconhecimento de erros." },
+            pe: { luz: "Imagem de resiliência, força e renovação. Perfil de alguém que não teme recomeços e transmite a coragem necessária para derrubar o que está errado.", sombra: "Impressão de ser briguento, soberbo, intransigente ou explosivo. A postura de constante distanciamento assusta e afasta quem tenta aproximação." },
+            pg: { luz: "Atuação reformista e reestruturadora. Capacidade de adaptação perante imprevistos, abandonando o obsoleto para iniciar novas trajetórias com lucidez.", sombra: "Comportamento destrutivo e impaciente. Mudança repentina de opinião gerando instabilidade crônica, aliada ao abuso de poder e agressividade." },
+            rva: { luz: "Libertação definitiva de padrões rígidos, baseada numa resiliência forjada por grandes quedas superadas em vidas passadas.", sombra: "Trauma profundo gerado por perdas abruptas ou abandonos, resultando num medo oculto de que tudo o que se constrói pode desabar a qualquer momento." },
+            mva: { luz: "Missão reconstrutora e despertadora. Exemplo vivo de superação, ajudando a sociedade a romper dogmas e a reconstruir-se sobre verdades.", sombra: "Fracasso ao promover a desordem coletiva e a rebeldia sem propósito. A inflexibilidade e a soberba transformarão as lições em quedas contínuas." },
+            oc: "Diante do colapso de uma situação, emerge a aceitação corajosa da queda e a capacidade imediata de planear uma nova fundação a partir das ruínas.",
+            df: "Superação do orgulho, da soberba e da impaciência belicosa. O desafio é aprender a mudar sem necessariamente precisar destruir tudo o que foi construído.",
+            ab: "Instabilidade aguda causada pela recusa violenta da verdade. Tentar sustentar ilusões ou usar de abuso de poder trará o colapso inevitável."
+        },
+        17: {
+            nome: "A Estrela", sub: "A Inspiração e o Renascimento da Esperança",
+            geral: { luz: "Criativo, sonhador (equilibrado), otimista, discernidor, despojado.", sombra: "Iludido, alienado, apático, desgastado, irrealista." },
+            pi: { luz: "Essência otimista, humilde e criativa. Profunda renovação da esperança e busca sincera por um propósito que alinhe os sonhos com a realidade.", sombra: "Postura de ilusão e desconexão. Fuga para o mundo da fantasia, gerando a sensação de viver sem metas, sem objetivos claros e desgaste energético." },
+            pe: { luz: "Imagem luminosa, carismática e inspiradora. Transmissão de autenticidade, leveza e de uma presença que traz paz aos outros.", sombra: "Impressão externa de ingenuidade excessiva ou de alienação, parecendo alguém que vive no 'mundo da lua' e desconectado dos problemas práticos." },
+            pg: { luz: "Atuação inspirada e focada no discernimento. Movimento suave em direção aos objetivos, integrando o brilho pessoal, as artes e inovação na rotina.", sombra: "Comportamento excessivamente sonhador e apático. Idealização extrema sem atitudes práticas, gerando perda de energia e dificuldade em concretizar." },
+            rva: { luz: "Cura serena de traumas passados e a manutenção de uma intuição e inspiração puras e intocadas pela dureza do mundo.", sombra: "Apego melancólico a ilusões antigas ou sonhos não realizados, causando um desperdício da energia vital no presente." },
+            mva: { luz: "Missão iluminadora e de cura. Encontrar o próprio brilho e servir de referência e esperança, trazendo clareza e renovação aos ambientes.", sombra: "Queda provocada pela recusa em enraizar. Viver perpetuamente na idealização irreal, sem gerar ações que impactem o mundo físico de forma tangível." },
+            oc: "Nos momentos de trevas ou desilusão coletiva, acionamento de uma fé inabalável e visão otimista que encontram a 'luz no fim do túnel'.",
+            df: "Superação da alienação e da falta de direcionamento prático. O desafio é transformar o sonho num planeamento executável, sem fugir das responsabilidades.",
+            ab: "Instabilidade provocada pelo excesso de ingenuidade e distorção perceptiva. Confiar cegamente em situações ou pessoas duvidosas esgotará as energias."
+        },
+        18: {
+            nome: "A Lua", sub: "O Inconsciente e a Leitura dos Mistérios",
+            geral: { luz: "Prudente, cauteloso, misterioso, observador, holístico, perceptivo.", sombra: "Instável, falso, somatizador, paranoico, iludido, inseguro, solitário." },
+            pi: { luz: "Essência profunda, intuitiva e ligada ao oculto. Necessidade de observar a realidade e profunda aceitação dos ciclos emocionais e marés da alma.", sombra: "Postura insegura e instável. Medos profundos, pesadelos, ansiedade e forte tendência a somatizar doenças devido à excessiva imaginação." },
+            pe: { luz: "Imagem de enorme magnetismo, sensibilidade e mistério envolvente. Transmite um ar de quem compreende as emoções de forma holística.", sombra: "Impressão externa de falsidade ou de usar uma máscara social intransponível. A instabilidade de humor passa a imagem de não confiável." },
+            pg: { luz: "Atuação cautelosa, prudente e extremamente observadora. Navega em cenários complexos captando informações sutis e usando imaginação criativa.", sombra: "Comportamento focado em enganos, onde a facilidade de iludir os outros ou se autoiludir gera desconfiança mútua, boatos e solidão." },
+            rva: { luz: "Resgate de memórias valiosas do inconsciente, talentos místicos e grande capacidade de autoconhecimento herdada.", sombra: "Carga kármica pesada de medos infundados, ilusões antigas ou traumas ocultos que ainda assombram as atitudes e as escolhas do presente." },
+            mva: { luz: "Missão terapêutica e de percepção profunda. Iluminar o caminho de outras pessoas através da sensibilidade, da psicologia e do cuidado holístico.", sombra: "Queda causada pelo apego à farsa. A manutenção de uma máscara social para esconder inseguranças afastará qualquer possibilidade de viver relações verdadeiras." },
+            oc: "Perante ameaças invisíveis ou mentiras alheias, acionamento de um 'radar' psíquico e mediúnico imbatível que detecta o perigo antes de se concretizar.",
+            df: "Superação da insegurança, do medo e da tendência à somatização. O desafio é separar a intuição lúcida da fantasia paralisante.",
+            ab: "Instabilidade gravíssima provocada pelo autoengano e por paranoias. Acreditar em fantasias sombrias resultará numa perda dolorosa de sanidade e rumo."
+        },
+        19: {
+            nome: "O Sol", sub: "A Clareza Absoluta e o Brilho Pessoal",
+            geral: { luz: "Sincero, feliz, leal, criativo, independente, brilhante, romântico.", sombra: "Comodista, orgulhoso, vaidoso, arrogante, infantil, superficial." },
+            pi: { luz: "Essência de alegria, sinceridade e anseio de independência. Sentimento íntimo de confiança vital e necessidade de expressão autêntica e romântica.", sombra: "Postura egocêntrica. O excesso de autoimportância cega a capacidade de autocrítica, alimentando um desejo insaciável por validação." },
+            pe: { luz: "Imagem radiante, de fácil sorriso, extrema lealdade e facilidade de expressão. Perfil que inspira confiança imediata e irradia sucesso.", sombra: "Transmissão de uma imagem vaidosa, arrogante ou exibicionista, criando o estigma de ser alguém que precisa ofuscar os outros para brilhar." },
+            pg: { luz: "Atuação criativa, independente e propícia a negócios bem-sucedidos. Demonstração prática de talento, dinamismo e liderança calorosa.", sombra: "Comportamento comodista. Ao tomar consciência da sua facilidade natural em obter sucesso, estagna, não procurando mais melhorar ou inovar." },
+            rva: { luz: "Superação heroica de memórias felizes integradas e um histórico sólido de clareza, vitórias e liderança positiva.", sombra: "Apego excessivo a glórias antigas, mantendo uma nostalgia orgulhosa que impede o reconhecimento da necessidade de suar e batalhar no presente." },
+            mva: { luz: "Missão radiante e empoderadora. Iluminar o caminho coletivo com sinceridade, partilhando o sucesso dos negócios e promovendo alegria.", sombra: "Queda motivada pelo narcisismo. Buscar o brilho a qualquer custo e ignorar as necessidades e o espaço do outro esgotará a energia ao redor." },
+            oc: "Perante situações sombrias, acionamento instantâneo da vitalidade, do otimismo e da clareza absoluta, trazendo luz para solucionar o impossível.",
+            df: "Superação da vaidade e do comodismo. O desafio diário é evitar que o próprio sucesso se torne a desculpa perfeita para a preguiça.",
+            ab: "Rupturas dramáticas por conta da soberba. Assumir riscos imprudentes pelo ego ou tentar dominar os outros através da vaidade extinguirá as realizações."
+        },
+        20: {
+            nome: "O Julgamento", sub: "O Despertar e a Reavaliação da Vida",
+            geral: { luz: "Justo, progressista, revelador, respeitado, pensativo, avaliador.", sombra: "Saudosista, distante, inflexível, nostálgico, julgador, insociável." },
+            pi: { luz: "Essência pensativa, justa e orientada para o progresso. Desejo de despertar a consciência, avaliar propósitos e libertar-se das amarras da história.", sombra: "Postura interior saudosista e distante. Excesso de peso colocado no passado, cultivando culpas irreais e uma severa resistência em se perdoar." },
+            pe: { luz: "Imagem de indivíduo respeitado, natural formador de opiniões e transmite a segurança de alguém renascido e maduro.", sombra: "Impressão de ser alguém severo, que vive com o dedo apontado, revelando-se pouco sociável e excessivamente preso a julgamentos alheios." },
+            pg: { luz: "Atuação renovadora. Aproveitamento prático de oportunidades para reavaliar projetos, aceitar transições definitivas e promover reformas éticas.", sombra: "Comportamento estagnado pelas memórias. Preso a lembranças dolorosas que paralisam e impedem de realizar mudanças cruciais no presente." },
+            rva: { luz: "Assimilação de lições profundas e absolutas, refletindo um espírito de longa caminhada, desprendido e perdoado dos seus erros antigos.", sombra: "Carga kármica de acusações, condenações do passado ou apego doentio a antigas vidas e glórias, resultando em inaptidão para o convívio." },
+            mva: { luz: "Missão redentora e inspiradora. Atuação como farol para o despertar de consciências coletivas, auxiliando na libertação de culpas.", sombra: "Estagnação ao sentar no tribunal da vida, exigindo perfeição dos outros, mas negando-se a passar pelo seu próprio renascimento interno." },
+            oc: "Nos momentos de viragem, desponta a coragem inata para atender o 'chamado interior', deixando crenças ultrapassadas e tomando decisões redentoras.",
+            df: "Superação da inflexibilidade, saudosismo e da postura julgadora. O desafio é evitar a autocrítica destrutiva, aprendendo a perdoar para encerrar ciclos.",
+            ab: "Instabilidades severas geradas pela incapacidade de fechar processos antigos. Manter ressentimentos velhos ou usar de um moralismo vingativo causará abalos."
+        },
+        21: {
+            nome: "O Mundo", sub: "A Conclusão e a Realização Plena",
+            geral: { luz: "Realizador, perfeito, sociável, triunfante, seguro, líder.", sombra: "Autoritário, prepotente, arrogante, solitário, bloqueado." },
+            pi: { luz: "Essência realizadora, em busca profunda por perfeição e completude. Sentimento íntimo de pertencer ao universo, apoiado em intuição madura.", sombra: "Sensação interna de vazio ou incompletude constante. Medo de não alcançar a totalidade, gerando dificuldade enorme em concluir e encerrar os ciclos." },
+            pe: { luz: "Imagem de indivíduo triunfante, seguro, sociável e feliz. Transmissão do perfil de um líder natural, de comando agregador e respeitado.", sombra: "Percepção externa de ser alguém arrogante, prepotente ou autoritário, adotando uma postura superior que, inevitavelmente, afasta os demais." },
+            pg: { luz: "Atuação no nível da excelência. Promove realizações práticas notáveis, busca inovações, encerra ciclos e mantém um equilíbrio primoroso.", sombra: "Comportamento isolado. O desejo de ser o 'centro do mundo' aliado a uma exigência perfeccionista irreal, leva à autossabotagem na reta final e à solidão." },
+            rva: { luz: "Integração absoluta de aprendizagens em eras anteriores, trazendo uma sabedoria ancestral pronta a ser aplicada na matéria com leveza.", sombra: "Aprisionamento às glórias de tempos em que se considerava absoluto, carregando hoje uma frustração inexplicável ao lidar com a rotina." },
+            mva: { luz: "Missão voltada para a realização plena e para o comando de projetos abrangentes. Favorecer a integração harmoniosa de pessoas e ideais.", sombra: "Omissão da missão ao adotar a via da tirania e do ego exacerbado. Buscar os holofotes de forma puramente vaidosa anulará os resultados e condenará à frustração." },
+            oc: "Perante bloqueios e transições difíceis, ativa o comando interno com clareza, fechando a questão de forma definitiva para iniciar o ciclo seguinte com glória.",
+            df: "Superação da arrogância, prepotência e da solidão elitista. O desafio é não se considerar inatingível, aceitando que o triunfo se constrói na troca com o outro.",
+            ab: "Instabilidade aguda causada pelo autoritarismo extremo. A ilusão de se julgar acima das leis universais ou ditar a vida alheia com soberba gerará esvaziamento total."
+        },
+        22: {
+            nome: "O Louco", sub: "O Impulso Vital e a Liberdade Absoluta",
+            geral: { luz: "Livre, desprendido, alegre, entusiasta, corajoso, espontâneo.", sombra: "Imaturo, inocente, inconstante, irresponsável, estressado, viciado." },
+            pi: { luz: "Essência de liberdade plena e desprendimento. Necessidade íntima de espaço, novidade e um impulso inabalável de viver o agora com fé independente.", sombra: "Postura inconstante, ansiosa e imatura. Conflito gerado pela ausência de responsabilidade, sofrendo intenso stress mental na tentativa de escapar às regras." },
+            pe: { luz: "Projeção da imagem de alguém jovial, espontâneo, entusiasta e incrivelmente corajoso, atraindo os outros pela sua energia leve.", sombra: "Impressão externa de irresponsabilidade ou de inocência beirando a tolice. Visto por muitos como alguém volúvel e sem foco para o longo prazo." },
+            pg: { luz: "Atuação marcada pela capacidade inesgotável de recomeçar, determinando novos caminhos sem medo, abraçando aventuras e imprimindo prazer.", sombra: "Comportamento marcado por fugas repentinas, instabilidade de empregos e propensão a envolver-se em intrigas gratuitas ou vícios para fugir à rotina." },
+            rva: { luz: "Espiritualidade independente, criatividade revolucionária e alma desbravadora purificada ao longo de inúmeros inícios e fins de ciclo.", sombra: "Tendência kármica à eterna evasão. Fugas irresponsáveis passadas deixaram uma marca de repulsa instintiva a raízes e obrigações." },
+            mva: { luz: "Missão inovadora, focada na desconstrução de barreiras. Exemplo de vivência da alegria pura e de como confiar plenamente no avanço espiritual genuíno.", sombra: "Desperdício da vida através de uma juventude eterna irresponsável. O excesso de liberdade, sem metas, gerará apenas estagnação e falta de impacto real." },
+            oc: "Em momentos de paralisação e colapso geral, encontra no desprendimento absoluto a capacidade de 'saltar para o vazio', inaugurando rotas inéditas com confiança total.",
+            df: "Superação da inconstância e da imaturidade. O desafio é interiorizar que a busca por liberdade necessita de um grau de responsabilidade material para não ser destrutiva.",
+            ab: "Rupturas dramáticas e fulminantes causadas pela irresponsabilidade extrema, pelo envolvimento em intrigas ou vícios. A liberdade sem consciência destrói a evolução."
+        }
+    };
+
+    const tooltip = document.getElementById('tooltip');
+    const tooltipFieldTitle = document.getElementById('tt-field-title');
+    const tooltipFieldDesc = document.getElementById('tt-field-desc');
+    const tooltipArcanoSection = document.getElementById('tt-arcano-section');
+    const ttModeDual = document.getElementById('tt-mode-dual');
+    const ttModeSingle = document.getElementById('tt-mode-single');
+    const ttSingleLabel = document.getElementById('tt-single-label');
+    const ttSingleText = document.getElementById('tt-single-text');
+    
+    function mostrarTooltip(card, e) {
+        const fieldKey = card.getAttribute('data-field');
+        if(!fieldKey) return;
+
+        const fieldInfo = camposData[fieldKey];
+        if(fieldInfo) {
+            tooltipFieldTitle.innerText = fieldInfo.title;
+            tooltipFieldDesc.innerText = fieldInfo.desc;
+        }
+
+        if(fieldKey === 'ilka') {
+            tooltipArcanoSection.style.display = 'none';
+            tooltip.classList.add('visible');
+            posicionarTooltip(e);
+            return;
+        }
+
+        tooltipArcanoSection.style.display = 'block';
+
+        const valEl = card.querySelector('.value');
+        if(!valEl) return;
+        
+        const num = parseInt(valEl.innerText);
+        
+        if(arquetiposData[num]) {
+            const arcData = arquetiposData[num];
+            document.getElementById('tt-title').innerText = `${num} - ${arcData.nome}`;
+            document.getElementById('tt-sub').innerText = arcData.sub;
+            
+            let specificData = arcData[fieldKey] || arcData['geral'];
+
+            if(typeof specificData === 'string') {
+                ttModeDual.style.display = 'none';
+                ttModeSingle.style.display = 'block';
+                
+                if(fieldKey === 'oc') ttSingleLabel.innerText = "➤ A Essência Silenciosa (Oculta):";
+                else if(fieldKey === 'df') ttSingleLabel.innerText = "➤ O Desafio Principal a ser vencido:";
+                else if(fieldKey === 'ab') ttSingleLabel.innerText = "➤ Risco de Queda e Abalo:";
+                else ttSingleLabel.innerText = "➤ Atuação:";
+
+                ttSingleText.innerText = specificData;
+
+            } else {
+                ttModeSingle.style.display = 'none';
+                ttModeDual.style.display = 'block';
+                document.getElementById('tt-luz').innerText = specificData.luz;
+                document.getElementById('tt-sombra').innerText = specificData.sombra;
+            }
+
+            tooltip.classList.add('visible');
+            
+        } else if (num === 0) {
+            document.getElementById('tt-title').innerText = "0 - Sem Desafio Kármico";
+            document.getElementById('tt-sub').innerText = "Harmonia Plena / O Louco";
+            ttModeSingle.style.display = 'none';
+            ttModeDual.style.display = 'block';
+            document.getElementById('tt-luz').innerText = "Livre de repetições kármicas severas nesta área. O caminho está livre para atuar com a liberdade do Louco (22).";
+            document.getElementById('tt-sombra').innerText = "Cuidado com a total irresponsabilidade ou falta de direção por não ter um desafio a lhe empurrar.";
+            tooltip.classList.add('visible');
+        }
+        
+        posicionarTooltip(e);
+    }
+
+    function posicionarTooltip(e) {
+        if(window.innerWidth <= 768) return; // Se for mobile, o CSS já posicionou fixo
+
+        let x = e.clientX + 20;
+        let y = e.clientY + 20;
+
+        if (x + tooltip.offsetWidth > window.innerWidth) {
+            x = e.clientX - tooltip.offsetWidth - 20;
+        }
+        if (y + tooltip.offsetHeight > window.innerHeight) {
+            y = e.clientY - tooltip.offsetHeight - 20;
+        }
+
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+    }
+
+    // Configura eventos para Desktop (Hover) e Celular (Click/Tap)
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', (e) => mostrarTooltip(card, e));
+        card.addEventListener('mousemove', (e) => posicionarTooltip(e));
+        card.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+        
+        card.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evita que o clique feche imediatamente
+            mostrarTooltip(card, e);
+        });
+    });
+
+    // Fechar tooltip ao tocar fora no mobile
+    document.addEventListener('click', (e) => {
+        if(!e.target.closest('.card') && !e.target.closest('#tooltip')) {
+            tooltip.classList.remove('visible');
+        }
+    });
+
+    function somaDigitos(n) {
+        return String(n).split('').reduce((acc, val) => acc + parseInt(val), 0);
+    }
+
+    function reduzir(n) {
+        while (n > 22) {
+            n = somaDigitos(n);
+        }
+        return n;
+    }
+
+    function obterSigno(dia, mes) {
+        if((mes == 3 && dia >= 21) || (mes == 4 && dia <= 19)) return "Áries";
+        if((mes == 4 && dia >= 20) || (mes == 5 && dia <= 20)) return "Touro";
+        if((mes == 5 && dia >= 21) || (mes == 6 && dia <= 20)) return "Gêmeos";
+        if((mes == 6 && dia >= 21) || (mes == 7 && dia <= 22)) return "Câncer";
+        if((mes == 7 && dia >= 23) || (mes == 8 && dia <= 22)) return "Leão";
+        if((mes == 8 && dia >= 23) || (mes == 9 && dia <= 22)) return "Virgem";
+        if((mes == 9 && dia >= 23) || (mes == 10 && dia <= 22)) return "Libra";
+        if((mes == 10 && dia >= 23) || (mes == 11 && dia <= 21)) return "Escorpião";
+        if((mes == 11 && dia >= 22) || (mes == 12 && dia <= 21)) return "Sagitário";
+        if((mes == 12 && dia >= 22) || (mes == 1 && dia <= 19)) return "Capricórnio";
+        if((mes == 1 && dia >= 20) || (mes == 2 && dia <= 18)) return "Aquário";
+        if((mes == 2 && dia >= 19) || (mes == 3 && dia <= 20)) return "Peixes";
+        return "";
+    }
+
+    function calcularArcanoPessoal(nome) {
+        const tabela = {
+            'A': 1, 'J': 1, 'S': 1,
+            'B': 2, 'K': 2, 'T': 2,
+            'C': 3, 'L': 3, 'U': 3,
+            'D': 4, 'M': 4, 'V': 4,
+            'E': 5, 'N': 5, 'W': 5,
+            'F': 6, 'O': 6, 'X': 6,
+            'G': 7, 'P': 7, 'Y': 7,
+            'H': 8, 'Q': 8, 'Z': 8,
+            'I': 9, 'R': 9
+        };
+        const nomeLimpo = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+        let soma = 0;
+        for (let i = 0; i < nomeLimpo.length; i++) {
+            const letra = nomeLimpo[i];
+            if (tabela[letra]) soma += tabela[letra];
+        }
+        return reduzir(soma); 
+    }
+
+    function calcular() {
+        const nome = document.getElementById('nome').value || "Assistido";
+        let dataStr = document.getElementById('data_nasc').value;
+        const anoAnalise = parseInt(document.getElementById('ano_analise').value);
+
+        if(!dataStr || !anoAnalise) {
+            alert("Por favor, preencha a data de nascimento e o ano de análise.");
+            return;
+        }
+
+        // Parse de data blindado para mobile
+        let anoNasc, mesNasc, diaNasc;
+        if(dataStr.includes('-')) {
+            const partesData = dataStr.split('-');
+            anoNasc = parseInt(partesData[0]);
+            mesNasc = parseInt(partesData[1]);
+            diaNasc = parseInt(partesData[2]);
+        } else {
+            const d = new Date(dataStr);
+            anoNasc = d.getUTCFullYear();
+            mesNasc = d.getUTCMonth() + 1;
+            diaNasc = d.getUTCDate();
+        }
+
+        const PI = reduzir(diaNasc);
+        const PE = mesNasc; 
+        const PG = reduzir(diaNasc + mesNasc); 
+        const OC = somaDigitos(PG);
+        
+        let DF = 0;
+        if(PG < 10) {
+            DF = PG; 
+        } else {
+            let p1 = Math.floor(PG / 10);
+            let p2 = PG % 10;
+            DF = Math.abs(p1 - p2); 
+        }
+
+        const RVA = reduzir(somaDigitos(anoNasc));
+        const somaMVA = diaNasc + mesNasc + anoNasc;
+        const MVA = reduzir(somaDigitos(somaMVA));
+        const FD = reduzir(RVA + DF);
+        const FM = reduzir(MVA + PG);
+        const AB = reduzir(FM + FD);
+        const ILKA = diaNasc + mesNasc + RVA + MVA;
+        const anoILKA = anoNasc + ILKA; 
+
+        const FAR = reduzir(anoAnalise + MVA);
+        let diff = anoAnalise - anoNasc;
+        let cicloAtual = Math.max(1, Math.ceil(diff / MVA)); 
+        let anoRenovacao = anoNasc + (MVA * cicloAtual);
+        const FCR = reduzir(somaDigitos(anoRenovacao));
+        const FP = reduzir(FAR + FCR);
+
+        const arcano = calcularArcanoPessoal(nome);
+
+        document.getElementById('res_nome').innerText = nome;
+        document.getElementById('res_signo').innerText = obterSigno(diaNasc, mesNasc);
+        document.getElementById('res_ano').innerText = anoAnalise;
+
+        document.getElementById('val_pi').innerText = PI;
+        document.getElementById('val_pe').innerText = PE;
+        document.getElementById('val_pg').innerText = PG;
+        document.getElementById('val_oc').innerText = OC;
+        document.getElementById('val_df').innerText = DF;
+        document.getElementById('val_rva').innerText = RVA;
+        document.getElementById('val_mva').innerText = MVA;
+        document.getElementById('val_fd').innerText = FD;
+        document.getElementById('val_fm').innerText = FM;
+        document.getElementById('val_ab').innerText = AB;
+        document.getElementById('val_ilka').innerText = ILKA;
+        document.getElementById('val_ano_ilka').innerText = `Ano: ${anoILKA}`; 
+        document.getElementById('val_far').innerText = FAR;
+        document.getElementById('val_fcr').innerText = FCR;
+        document.getElementById('val_fp').innerText = FP;
+
+        document.getElementById('val_arcano').innerText = arcano;
+        document.getElementById('desc_arcano').innerText = arquetiposData[arcano] ? arquetiposData[arcano].nome : "";
+
+        // Mostra a seção
+        const resultsSection = document.getElementById('results');
+        resultsSection.style.display = 'block';
+
+        // Auto-Scroll suave para mostrar no mobile
+        setTimeout(() => {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+</script>
+
+</body>
+</html>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://bbochtktsyrvkccbkgur.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJib2NodGt0c3lydmtjY2JrZ3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzM0MzUsImV4cCI6MjA5MjA0OTQzNX0.i3XFaK10ziRC6USBm-pw9pOoXIvzY2LgDaskDCDyd1E'
+)
+
+async function proteger() {
+  const { data } = await supabase.auth.getUser()
+
+  if (!data?.user) {
+    window.location.href = "index.html"
+  }
+}
+
+proteger()
+</script>
