@@ -129,15 +129,14 @@ async function checkUser() {
 
   const email = userData.user.email
 
-  // Busca o email na tabela
+  // Busca todos os registros do email (evita erro de duplicata)
   const { data, error } = await supabase
     .from('permitidos')
     .select('status')
     .eq('email', email)
-    .single()
 
-  // Email não encontrado — cadastra como pendente
-  if (error || !data) {
+  // Email não encontrado — cadastra como pendente (só uma vez)
+  if (error || !data || data.length === 0) {
     await supabase.from('permitidos').insert([
       { email: email, status: 'pendente' }
     ])
@@ -146,10 +145,13 @@ async function checkUser() {
     return
   }
 
-  // Email encontrado — verifica status
-  if (data.status === 'aprovado') {
+  // Verifica se algum registro está aprovado
+  const aprovado = data.find(r => r.status === 'aprovado')
+  const pendente = data.find(r => r.status === 'pendente')
+
+  if (aprovado) {
     window.location.href = 'calculadora.html'
-  } else if (data.status === 'pendente') {
+  } else if (pendente) {
     await supabase.auth.signOut()
     document.getElementById('msg-pendente').style.display = 'block'
   } else {
