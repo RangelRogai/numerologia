@@ -26,6 +26,42 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            visibility: hidden;
+        }
+
+        #tela-carregando {
+            position: fixed;
+            inset: 0;
+            background-color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            visibility: visible;
+            flex-direction: column;
+            gap: 16px;
+            color: #94a3b8;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #334155;
+            border-top-color: #d97706;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-topo {
+            display: block;
+            margin: 0 auto 10px auto;
+            width: 90px;
         }
 
         .container {
@@ -305,7 +341,10 @@
 </head>
 <body>
 
+<div id="tela-carregando"><div class="spinner"></div><span>Verificando acesso...</span></div>
+
 <div class="container">
+    <img src="logo.png" class="logo-topo" alt="Logo">
     <h1>Numerologia Arquetípica</h1>
     <p class="subtitle">Descubra as frequências do seu mapa de autoconhecimento</p>
 
@@ -1065,7 +1104,12 @@ async function proteger() {
 
   if (!data?.user) {
     window.location.href = "index.html"
+    return
   }
+
+  // Autenticado: esconde loading e mostra página
+  document.getElementById('tela-carregando').style.display = 'none'
+  document.body.style.visibility = 'visible'
 }
 
 proteger()
