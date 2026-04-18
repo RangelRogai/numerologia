@@ -31,69 +31,18 @@
         .container {
             max-width: 900px;
             width: 100%;
-            /* Esconde inicialmente até validar o login */
-            display: none; 
         }
 
-        /* Estilos do Topo (Header Logado) */
-        .app-header {
+        h1 {
             text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .app-header h1 {
             color: var(--accent);
             margin-bottom: 5px;
         }
 
-        .logo {
-            width: 120px;
-            margin-bottom: 15px;
-        }
-
-        .main-section-title {
-            background: linear-gradient(90deg, rgba(217, 119, 6, 0.15) 0%, transparent 100%);
-            border-left: 4px solid var(--accent);
-            padding: 10px 15px;
-            margin: 40px 0 20px 0;
-            font-size: 1.3rem;
-            color: var(--accent);
-            font-weight: 600;
-            border-radius: 4px;
-            text-align: left;
-        }
-
-        .app-header .subtitle {
+        p.subtitle {
+            text-align: center;
             color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .user-info {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.05);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 1px solid #334155;
-        }
-
-        .user-info span {
-            color: #cbd5e1;
-            font-weight: 600;
-        }
-
-        .logout-link {
-            color: var(--sombra-color);
-            text-decoration: none;
-            margin-left: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .logout-link:hover {
-            text-decoration: underline;
+            margin-bottom: 30px;
         }
 
         .input-section {
@@ -129,6 +78,7 @@
             background-color: #0f172a;
             color: var(--text-main);
             font-family: 'Poppins', sans-serif;
+            /* Melhoria para campos de data em mobile */
             -webkit-appearance: none;
             appearance: none;
         }
@@ -150,6 +100,7 @@
             cursor: pointer;
             transition: background 0.3s;
             margin-top: 10px;
+            /* Evita zoom ao dar duplo clique no mobile */
             touch-action: manipulation; 
         }
 
@@ -201,6 +152,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            /* Permite o toque no mobile sem bugs */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -238,7 +190,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.2s, transform 0.2s;
-            pointer-events: none;
+            pointer-events: none; /* No desktop, o mouse atravessa */
             box-shadow: 0 15px 40px rgba(0,0,0,0.8);
             backdrop-filter: blur(10px);
             color: var(--text-main);
@@ -249,17 +201,19 @@
             visibility: visible;
         }
 
+        /* Adaptação exclusiva para Celulares */
         @media(max-width: 768px) {
             #tooltip {
-                top: auto !important;
-                bottom: 20px !important;
+                top: auto !important; /* Remove posicionamento do mouse */
+                bottom: 20px !important; /* Fixa no fundo */
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                width: 90%;
-                max-height: 80vh;
-                overflow-y: auto;
-                pointer-events: auto;
+                width: 90%; /* Ocupa a largura da tela */
+                max-height: 80vh; /* Não deixa ultrapassar a tela */
+                overflow-y: auto; /* Permite rolagem no texto longo */
+                pointer-events: auto; /* Permite rolar com o dedo */
             }
+            /* Exibe instrução de fechar no mobile */
             #tt-mobile-close {
                 display: block !important;
             }
@@ -332,31 +286,13 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
-
-        /* Tela de Carregamento */
-        #loading-screen {
-            text-align: center;
-            margin-top: 20vh;
-            color: var(--accent);
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
     </style>
 </head>
 <body>
 
-<div id="loading-screen">⏳ Validando acesso...</div>
-
-<div class="container" id="app-container">
-    <div class="app-header">
-        <img src="logo.png" class="logo" alt="Logo Rangel Rogai">
-        <h1>Numerologia Arquetípica</h1>
-        <p class="subtitle">Descubra as frequências do seu mapa de autoconhecimento</p>
-        <div class="user-info">
-            Logado como: <span id="user-display-email">carregando...</span> 
-            <a class="logout-link" onclick="fazerLogout()">[ Sair ]</a>
-        </div>
-    </div>
+<div class="container">
+    <h1>Numerologia Arquetípica</h1>
+    <p class="subtitle">Descubra as frequências do seu mapa de autoconhecimento</p>
 
     <div class="input-section">
         <div class="input-group">
@@ -380,8 +316,6 @@
             <p>Signo Astrológico: <strong style="color: var(--accent);" id="res_signo"></strong></p>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">💡 Passe o mouse (ou toque) sobre os cards para ler a interpretação específica.</p>
         </div>
-
-        <div class="main-section-title" style="margin-top: 0;">✨ O Mapa da Vida (Padrões Fixos)</div>
 
         <div class="category-title">Identidade Vibracional (Nome)</div>
         <div class="grid-cards">
@@ -461,9 +395,7 @@
             </div>
         </div>
 
-        <div class="main-section-title">📅 Dinâmicas do Ano de <span id="res_ano"></span></div>
-
-        <div class="category-title">Ciclos e Energias Vigentes</div>
+        <div class="category-title">Dinâmicas do Ano e Ciclos (Ano Base: <span id="res_ano"></span>)</div>
         <div class="grid-cards">
             <div class="card" data-field="far">
                 <div class="title">FAR - Freq. do Ano Regente</div>
@@ -519,54 +451,7 @@
     <div id="tt-mobile-close">[ Toque para fechar ]</div>
 </div>
 
-<!-- Scripts de Proteção via Supabase e Cálculos -->
-<script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-    const supabase = createClient(
-      'https://bbochtktsyrvkccbkgur.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJib2NodGt0c3lydmtjY2JrZ3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzM0MzUsImV4cCI6MjA5MjA0OTQzNX0.i3XFaK10ziRC6USBm-pw9pOoXIvzY2LgDaskDCDyd1E'
-    )
-
-    async function proteger() {
-        const { data: { user } } = await supabase.auth.getUser()
-
-        // 1. Verifica se está logado no Google
-        if (!user) {
-            window.location.href = "index.html"
-            return
-        }
-
-        // 2. Extra Segurança: Verifica na tabela se o status está 'aprovado'
-        const { data: permissao, error } = await supabase
-            .from('permitidos')
-            .select('status')
-            .eq('email', user.email)
-            .single()
-
-        if (error || !permissao || permissao.status !== 'aprovado') {
-            // Se tentar burlar, redireciona de volta para a fila de espera/login
-            window.location.href = "index.html"
-            return
-        }
-
-        // Se chegou até aqui, está totalmente aprovado
-        document.getElementById('user-display-email').innerText = user.email;
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-    }
-
-    // Exporta a função de logout para usar no botão HTML
-    window.fazerLogout = async function() {
-        await supabase.auth.signOut();
-        window.location.href = "index.html";
-    }
-
-    proteger()
-</script>
-
 <script>
-    // --- LÓGICA DA CALCULADORA ---
     const camposData = {
         'arcano': { title: "Arcano Pessoal", desc: "A identidade vibracional extraída do nome. Representa o arquétipo principal, os sentimentos, as tendências, o perfil e o 'EU'." },
         'pi': { title: "Personalidade Interna (P.I.)", desc: "É o seu refúgio, o lugar para onde você volta quando está sozinho. Dita as suas necessidades mais íntimas e a forma peculiar de ver e sentir o mundo nos bastidores." },
@@ -628,7 +513,7 @@
             pi: { luz: "Essência positiva, perseverante e focada na ordem. Pensamento estruturado que anseia por estabilidade, segurança material e crescimento lógico.", sombra: "Postura mental ansiosa, possessiva e de perfeccionismo sufocante. A necessidade cega de proteção transforma-se numa rigidez inflexível." },
             pe: { luz: "Imagem de figura organizada, protetora e dotada de extrema força de execução. Transmissão imediata de confiança e liderança incontestável.", sombra: "Percepção externa de ser alguém prepotente, autoritário, frio ou intimidante, afastando as pessoas pelo excesso de dureza." },
             pg: { luz: "Ação diária pautada na perseverança e na solidez. Capacidade magistral de organizar recursos, executar grandes projetos materiais e proteger o seu território.", sombra: "Comportamento centralizador que se torna paradoxalmente desorganizado sob pressão, ou totalmente descontrolado e tirânico perante a ameaça de perda de poder." },
-            rva: { luz: "Resiliência material duradoura, estabilidade emocional e capacidade de execution amplamente testada e forjada pelo tempo.", sombra: "Perfil defensivo e teimoso, marcado por embates antigos de autoritarismo ou pendências kármicas severas com figuras paternas/chefias." },
+            rva: { luz: "Resiliência material duradoura, estabilidade emocional e capacidade de execução amplamente testada e forjada pelo tempo.", sombra: "Perfil defensivo e teimoso, marcado por embates antigos de autoritarismo ou pendências kármicas severas com figuras paternas/chefias." },
             mva: { luz: "Missão provedora e estruturante. Realização alcançada através da execução de projetos concretos, ordem justa e oferecimento de bases sólidas ao coletivo.", sombra: "Liderança pautada pela prepotência em vez do respeito natural. Focar exclusivamente na matéria e esquecer a empatia conduzirá ao desmoronamento." },
             oc: "Em situações de caos e rutura, desponta como o pilar seguro e racional, estabelecendo os limites e as regras que estabilizam e reestruturam o ambiente.",
             df: "Superação de uma atitude prepotente e controladora. O desafio central é abrandar o perfeccionismo que paralisa a ação, aprender a ceder e aceitar a vulnerabilidade.",
@@ -926,7 +811,7 @@
     }
 
     function posicionarTooltip(e) {
-        if(window.innerWidth <= 768) return; 
+        if(window.innerWidth <= 768) return; // Se for mobile, o CSS já posicionou fixo
 
         let x = e.clientX + 20;
         let y = e.clientY + 20;
@@ -942,19 +827,46 @@
         tooltip.style.top = y + 'px';
     }
 
+    // Configura eventos para Desktop (Hover) e Celular (Tap)
+    const isMobile = () => window.innerWidth <= 768;
+
     document.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('mouseenter', (e) => mostrarTooltip(card, e));
-        card.addEventListener('mousemove', (e) => posicionarTooltip(e));
-        card.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
-        
-        card.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            mostrarTooltip(card, e);
+        // Desktop: hover
+        card.addEventListener('mouseenter', (e) => {
+            if (!isMobile()) mostrarTooltip(card, e);
         });
+        card.addEventListener('mousemove', (e) => {
+            if (!isMobile()) posicionarTooltip(e);
+        });
+        card.addEventListener('mouseleave', () => {
+            if (!isMobile()) tooltip.classList.remove('visible');
+        });
+
+        // Mobile: toque com flag para evitar piscar
+        card.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Evita o click sintético do browser
+            const jaAberto = tooltip.classList.contains('visible') && tooltip.dataset.card === card.dataset.field;
+            if (jaAberto) {
+                tooltip.classList.remove('visible');
+                tooltip.dataset.card = '';
+            } else {
+                tooltip.dataset.card = card.dataset.field || card.id || Math.random();
+                mostrarTooltip(card, e.touches[0]);
+            }
+        }, { passive: false });
     });
 
+    // Fechar tooltip ao tocar fora no mobile
+    document.addEventListener('touchstart', (e) => {
+        if (!e.target.closest('.card') && !e.target.closest('#tooltip')) {
+            tooltip.classList.remove('visible');
+            tooltip.dataset.card = '';
+        }
+    }, { passive: true });
+
+    // Fechar tooltip ao clicar fora no desktop
     document.addEventListener('click', (e) => {
-        if(!e.target.closest('.card') && !e.target.closest('#tooltip')) {
+        if (!isMobile() && !e.target.closest('.card') && !e.target.closest('#tooltip')) {
             tooltip.classList.remove('visible');
         }
     });
@@ -1017,6 +929,7 @@
             return;
         }
 
+        // Parse de data blindado para mobile
         let anoNasc, mesNasc, diaNasc;
         if(dataStr.includes('-')) {
             const partesData = dataStr.split('-');
@@ -1085,9 +998,11 @@
         document.getElementById('val_arcano').innerText = arcano;
         document.getElementById('desc_arcano').innerText = arquetiposData[arcano] ? arquetiposData[arcano].nome : "";
 
+        // Mostra a seção
         const resultsSection = document.getElementById('results');
         resultsSection.style.display = 'block';
 
+        // Auto-Scroll suave para mostrar no mobile
         setTimeout(() => {
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
@@ -1096,3 +1011,21 @@
 
 </body>
 </html>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://bbochtktsyrvkccbkgur.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJib2NodGt0c3lydmtjY2JrZ3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzM0MzUsImV4cCI6MjA5MjA0OTQzNX0.i3XFaK10ziRC6USBm-pw9pOoXIvzY2LgDaskDCDyd1E'
+)
+
+async function proteger() {
+  const { data } = await supabase.auth.getUser()
+
+  if (!data?.user) {
+    window.location.href = "index.html"
+  }
+}
+
+proteger()
+</script>
