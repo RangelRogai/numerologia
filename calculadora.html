@@ -856,6 +856,13 @@
         }, { passive: false });
     });
 
+    // Fechar tooltip ao tocar no botão "Toque para fechar"
+    document.getElementById('tt-mobile-close').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        tooltip.classList.remove('visible');
+        tooltip.dataset.card = '';
+    }, { passive: false });
+
     // Fechar tooltip ao tocar fora no mobile
     document.addEventListener('touchstart', (e) => {
         if (!e.target.closest('.card') && !e.target.closest('#tooltip')) {
