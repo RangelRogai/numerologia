@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Admin — Numerologia Arquetípica</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0b0b0b, #1c1c1c);
+  color: white;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.topo {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.topo img {
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+.topo h1 {
+  font-size: 22px;
+  color: #caa85e;
+}
+
+.topo p {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.painel {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.secao-titulo {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.card .email {
+  font-size: 15px;
+  flex: 1;
+  word-break: break-all;
+}
+
+.card .data {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.btn:hover { opacity: 0.8; }
+
+.btn-aprovar {
+  background: #2cb67d;
+  color: white;
+}
+
+.btn-rejeitar {
+  background: #e53e3e;
+  color: white;
+}
+
+.btn-revogar {
+  background: #555;
+  color: white;
+}
+
+.vazio {
+  text-align: center;
+  color: #555;
+  font-size: 14px;
+  padding: 30px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.badge-pendente { background: rgba(202,168,94,0.2); color: #caa85e; }
+.badge-aprovado { background: rgba(44,182,125,0.2); color: #2cb67d; }
+.badge-negado   { background: rgba(229,62,62,0.2);  color: #e53e3e; }
+
+.bloco { margin-bottom: 40px; }
+
+#acesso-negado, #carregando {
+  text-align: center;
+  margin-top: 80px;
+  color: #888;
+}
+
+#acesso-negado h2 { color: #e53e3e; margin-bottom: 10px; }
+
+.logout-btn {
+  margin-top: 30px;
+  display: block;
+  text-align: center;
+}
+
+.logout-btn button {
+  background: transparent;
+  border: 1px solid #444;
+  color: #888;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.logout-btn button:hover { border-color: #888; color: white; }
+</style>
+</head>
+<body>
+
+<div id="carregando">⏳ Verificando acesso...</div>
+
+<div id="acesso-negado" style="display:none">
+  <h2>❌ Acesso negado</h2>
+  <p>Você não tem permissão para acessar esta página.</p>
+</div>
+
+<div id="app" style="display:none">
+  <div class="topo">
+    <img src="logo.png">
+    <h1>Painel de Aprovações</h1>
+    <p id="email-admin"></p>
+  </div>
+
+  <div class="painel">
+
+    <div class="bloco">
+      <div class="secao-titulo">⏳ Aguardando aprovação</div>
+      <div id="lista-pendentes"><div class="vazio">Nenhum pendente</div></div>
+    </div>
+
+    <div class="bloco">
+      <div class="secao-titulo">✅ Aprovados</div>
+      <div id="lista-aprovados"><div class="vazio">Nenhum</div></div>
+    </div>
+
+    <div class="bloco">
+      <div class="secao-titulo">❌ Rejeitados</div>
+      <div id="lista-negados"><div class="vazio">Nenhum</div></div>
+    </div>
+
+    <div class="logout-btn">
+      <button onclick="logout()">Sair</button>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://bbochtktsyrvkccbkgur.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJib2NodGt0c3lydmtjY2JrZ3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzM0MzUsImV4cCI6MjA5MjA0OTQzNX0.i3XFaK10ziRC6USBm-pw9pOoXIvzY2LgDaskDCDyd1E'
+)
+
+// Apenas estes emails podem acessar o admin
+const ADMINS = ['rangel@rangelrogai.com']
+
+window.logout = async function () {
+  await supabase.auth.signOut()
+  window.location.href = 'index.html'
+}
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) {
+    // Não logado — faz login com Google e volta aqui
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: 'https://exquisite-platypus-223951.netlify.app/admin.html' }
+    })
+    return
+  }
+
+  const email = session.user.email
+
+  if (!ADMINS.includes(email)) {
+    document.getElementById('carregando').style.display = 'none'
+    document.getElementById('acesso-negado').style.display = 'block'
+    return
+  }
+
+  document.getElementById('carregando').style.display = 'none'
+  document.getElementById('app').style.display = 'block'
+  document.getElementById('email-admin').textContent = email
+
+  await carregarUsuarios()
+}
+
+async function carregarUsuarios() {
+  const { data, error } = await supabase
+    .from('permitidos')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error || !data) return
+
+  const pendentes = data.filter(u => u.status === 'pendente')
+  const aprovados = data.filter(u => u.status === 'aprovado')
+  const negados   = data.filter(u => u.status === 'negado')
+
+  renderLista('lista-pendentes', pendentes, ['aprovar', 'rejeitar'])
+  renderLista('lista-aprovados', aprovados, ['revogar'])
+  renderLista('lista-negados',   negados,   ['aprovar'])
+}
+
+function renderLista(containerId, usuarios, acoes) {
+  const el = document.getElementById(containerId)
+
+  if (usuarios.length === 0) {
+    el.innerHTML = '<div class="vazio">Nenhum</div>'
+    return
+  }
+
+  el.innerHTML = usuarios.map(u => {
+    const data = new Date(u.created_at).toLocaleDateString('pt-BR')
+
+    const btns = acoes.map(acao => {
+      if (acao === 'aprovar')   return `<button class="btn btn-aprovar"  onclick="mudarStatus(${u.id}, 'aprovado')">✅ Aprovar</button>`
+      if (acao === 'rejeitar')  return `<button class="btn btn-rejeitar" onclick="mudarStatus(${u.id}, 'negado')">❌ Rejeitar</button>`
+      if (acao === 'revogar')   return `<button class="btn btn-revogar"  onclick="mudarStatus(${u.id}, 'negado')">🔒 Revogar</button>`
+    }).join('')
+
+    return `
+      <div class="card" id="card-${u.id}">
+        <div class="email">${u.email}</div>
+        <div class="data">${data}</div>
+        <div class="acoes">${btns}</div>
+      </div>
+    `
+  }).join('')
+}
+
+window.mudarStatus = async function(id, novoStatus) {
+  const { error } = await supabase
+    .from('permitidos')
+    .update({ status: novoStatus })
+    .eq('id', id)
+
+  if (error) {
+    alert('Erro ao atualizar. Tente novamente.')
+    return
+  }
+
+  await carregarUsuarios()
+}
+
+init()
+</script>
+
+</body>
+</html>
