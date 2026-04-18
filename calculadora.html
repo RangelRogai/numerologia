@@ -137,22 +137,21 @@
 
         .grid-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
         }
 
         .card {
             background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
             text-align: center;
             border-left: 4px solid var(--accent);
             transition: transform 0.2s, box-shadow 0.2s;
-            cursor: help; 
+            cursor: help;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* Permite o toque no mobile sem bugs */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -162,20 +161,40 @@
         }
 
         .card .value {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
             color: var(--accent);
-            margin: 10px 0;
+            margin: 6px 0;
         }
 
         .card .title {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             font-weight: 600;
         }
 
         .card .desc {
-            font-size: 0.75rem;
+            font-size: 0.68rem;
             color: var(--text-muted);
+        }
+
+        /* Botão de info exclusivo para mobile */
+        .card .btn-info {
+            display: none;
+            margin-top: 8px;
+            padding: 5px 10px;
+            background: rgba(217, 119, 6, 0.15);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            color: var(--accent);
+            font-size: 0.7rem;
+            cursor: pointer;
+            align-self: center;
+        }
+
+        @media(max-width: 768px) {
+            .card .btn-info {
+                display: inline-block;
+            }
         }
 
         /* Estilos da Janela Flutuante (Tooltip) */
@@ -204,21 +223,17 @@
         /* Adaptação exclusiva para Celulares */
         @media(max-width: 768px) {
             #tooltip {
-                top: auto !important; /* Remove posicionamento do mouse */
-                bottom: 20px !important; /* Fixa no fundo */
+                top: auto !important;
+                bottom: 20px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                width: 90%; /* Ocupa a largura da tela */
-                max-height: 80vh; /* Não deixa ultrapassar a tela */
-                overflow-y: auto; /* Permite rolagem no texto longo */
-                pointer-events: auto; /* Permite rolar com o dedo */
+                width: 90%;
+                max-height: 75vh;
+                overflow-y: auto;
+                pointer-events: auto;
             }
-            /* Exibe instrução de fechar no mobile */
             #tt-mobile-close {
                 display: block !important;
-            }
-            .card {
-                cursor: pointer;
             }
         }
 
@@ -324,6 +339,7 @@
                 <div class="value" id="val_arcano">0</div>
                 <div class="desc" id="desc_arcano" style="font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 5px;">O Arcano</div>
                 <div class="desc">Soma pitagórica do nome</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
         </div>
 
@@ -333,21 +349,25 @@
                 <div class="title">PI - Personalidade Interna</div>
                 <div class="value" id="val_pi">0</div>
                 <div class="desc">A alma nos bastidores</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" data-field="pe">
                 <div class="title">PE - Personalidade Externa</div>
                 <div class="value" id="val_pe">0</div>
                 <div class="desc">O cartão de visitas</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" data-field="pg">
                 <div class="title">PG - Personalidade Geral</div>
                 <div class="value" id="val_pg">0</div>
                 <div class="desc">A vida na prática</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" data-field="oc">
                 <div class="title">OC - Personalidade Oculta</div>
                 <div class="value" id="val_oc">0</div>
                 <div class="desc">A essência silenciosa</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
         </div>
 
@@ -357,21 +377,25 @@
                 <div class="title">RVA - Regência Vida Anterior</div>
                 <div class="value" id="val_rva">0</div>
                 <div class="desc">A bagagem do passado</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" data-field="mva">
                 <div class="title">MVA - Missão de Vida Atual</div>
                 <div class="value" id="val_mva">0</div>
                 <div class="desc">A bússola existencial</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" style="border-left-color: #ef4444;" data-field="df">
                 <div class="title">DF - Desafio Principal</div>
                 <div class="value" id="val_df">0</div>
                 <div class="desc">O aspecto a ser equilibrado</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" style="border-left-color: #ef4444;" data-field="ab">
                 <div class="title">AB - Abalo</div>
                 <div class="value" id="val_ab">0</div>
                 <div class="desc">O fator desestabilizador</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
         </div>
 
@@ -381,17 +405,20 @@
                 <div class="title">FD - Força do Desafio</div>
                 <div class="value" id="val_fd">0</div>
                 <div class="desc">O antídoto para estagnação</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" style="border-left-color: #22c55e;" data-field="fm">
                 <div class="title">FM - Força da Missão</div>
                 <div class="value" id="val_fm">0</div>
                 <div class="desc">Combustível para o propósito</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" style="border-left-color: #8b5cf6;" data-field="ilka">
                 <div class="title">ILKA</div>
                 <div class="value" id="val_ilka">0</div>
                 <div class="desc">Idade de Libertação (anos)</div>
                 <div class="desc" style="font-weight: 600; color: #a78bfa; margin-top: 5px; font-size: 0.9rem;" id="val_ano_ilka">Ano: 0000</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
         </div>
 
@@ -401,16 +428,19 @@
                 <div class="title">FAR - Freq. do Ano Regente</div>
                 <div class="value" id="val_far">0</div>
                 <div class="desc">Clima do ano específico</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" data-field="fcr">
                 <div class="title">FCR - Freq. do Ciclo Regente</div>
                 <div class="value" id="val_fcr">0</div>
                 <div class="desc">O grande ciclo de longo prazo</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
             <div class="card" style="border-left-color: #3b82f6;" data-field="fp">
                 <div class="title">FP - Frequência Principal</div>
                 <div class="value" id="val_fp">0</div>
                 <div class="desc">A síntese de energias do ano</div>
+                        <button class="btn-info">ℹ️ Ver interpretação</button>
             </div>
         </div>
     </div>
@@ -827,11 +857,11 @@
         tooltip.style.top = y + 'px';
     }
 
-    // Configura eventos para Desktop (Hover) e Celular (Tap)
+    // Configura eventos para Desktop (Hover) e Celular (botão ℹ️)
     const isMobile = () => window.innerWidth <= 768;
 
     document.querySelectorAll('.card').forEach(card => {
-        // Desktop: hover
+        // Desktop: hover no card inteiro
         card.addEventListener('mouseenter', (e) => {
             if (!isMobile()) mostrarTooltip(card, e);
         });
@@ -842,21 +872,25 @@
             if (!isMobile()) tooltip.classList.remove('visible');
         });
 
-        // Mobile: toque com flag para evitar piscar
-        card.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Evita o click sintético do browser
-            const jaAberto = tooltip.classList.contains('visible') && tooltip.dataset.card === card.dataset.field;
-            if (jaAberto) {
-                tooltip.classList.remove('visible');
-                tooltip.dataset.card = '';
-            } else {
-                tooltip.dataset.card = card.dataset.field || card.id || Math.random();
-                mostrarTooltip(card, e.touches[0]);
-            }
-        }, { passive: false });
+        // Mobile: toque apenas no botão ℹ️
+        const btnInfo = card.querySelector('.btn-info');
+        if (btnInfo) {
+            btnInfo.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const jaAberto = tooltip.classList.contains('visible') && tooltip.dataset.card === card.dataset.field;
+                if (jaAberto) {
+                    tooltip.classList.remove('visible');
+                    tooltip.dataset.card = '';
+                } else {
+                    tooltip.dataset.card = card.dataset.field;
+                    mostrarTooltip(card, e.touches[0]);
+                }
+            }, { passive: false });
+        }
     });
 
-    // Fechar tooltip ao tocar no botão "Toque para fechar"
+    // Fechar tooltip ao tocar no "Toque para fechar"
     document.getElementById('tt-mobile-close').addEventListener('touchstart', (e) => {
         e.preventDefault();
         tooltip.classList.remove('visible');
