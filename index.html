@@ -55,6 +55,26 @@ button {
 button:hover {
   opacity: 0.9;
 }
+
+.mensagem {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+}
+
+.mensagem.pendente {
+  background: rgba(202, 168, 94, 0.2);
+  border: 1px solid #caa85e;
+  color: #caa85e;
+}
+
+.mensagem.negado {
+  background: rgba(255, 80, 80, 0.2);
+  border: 1px solid #ff5050;
+  color: #ff5050;
+}
 </style>
 </head>
 
@@ -67,6 +87,16 @@ button:hover {
   <div class="subtitle">Mapa Completo</div>
 
   <button onclick="login()">Entrar com Google</button>
+
+  <div class="mensagem pendente" id="msg-pendente">
+    ⏳ Seu acesso está sendo analisado.<br>
+    Aguarde a aprovação e tente novamente em breve.
+  </div>
+
+  <div class="mensagem negado" id="msg-negado">
+    ❌ Acesso não autorizado.<br>
+    Entre em contato com o administrador.
+  </div>
 </div>
 
 <script type="module">
@@ -81,12 +111,11 @@ window.login = async function () {
   await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://cute-tapioca-71fcf0.netlify.app/index.html'
+      redirectTo: 'https://exquisite-platypus-223951.netlify.app/index.html'
     }
   })
 }
 
-// 🔑 CORREÇÃO: deixa o listener cuidar de TUDO
 supabase.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session) {
     await checkUser()
@@ -94,21 +123,42 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 })
 
 async function checkUser() {
-  const { data } = await supabase.auth.getUser()
+  const { data: userData } = await supabase.auth.getUser()
 
-  if (data?.user) {
-    const email = data.user.email
-    const permitidos = ["rangel@rangelrogai.com"]
+  if (!userData?.user) return
 
-    if (!permitidos.includes(email)) {
-      alert("Acesso não autorizado")
-      await supabase.auth.signOut()
-      return
-    }
+  const email = userData.user.email
 
-    window.location.href = "calculadora.html"
+  // Busca o email na tabela
+  const { data, error } = await supabase
+    .from('permitidos')
+    .select('status')
+    .eq('email', email)
+    .single()
+
+  // Email não encontrado — cadastra como pendente
+  if (error || !data) {
+    await supabase.from('permitidos').insert([
+      { email: email, status: 'pendente' }
+    ])
+    await supabase.auth.signOut()
+    document.getElementById('msg-pendente').style.display = 'block'
+    return
+  }
+
+  // Email encontrado — verifica status
+  if (data.status === 'aprovado') {
+    window.location.href = 'calculadora.html'
+  } else if (data.status === 'pendente') {
+    await supabase.auth.signOut()
+    document.getElementById('msg-pendente').style.display = 'block'
+  } else {
+    await supabase.auth.signOut()
+    document.getElementById('msg-negado').style.display = 'block'
   }
 }
+
+checkUser()
 </script>
 
 </body>
